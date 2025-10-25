@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Evolution of Trust - Interactive Game</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.7.0/p5.min.js"></script>
+</head>
+<body>
+    <div id="app">
+        <header>
+            <h1>Evolution of Trust</h1>
+            <p class="subtitle">An interactive guide to the game theory of cooperation</p>
+        </header>
+
+        <main id="game-container">
+            <!-- Tutorial Section -->
+            <section id="tutorial" class="game-section active">
+                <h2>Understanding the Game</h2>
+                <div class="narrative-text">
+                    <p>In this game, you'll explore how trust emerges in repeated interactions.</p>
+                    <p>Each round, you and your opponent choose: <strong class="cooperate">Cooperate</strong> or <strong class="defect">Defect</strong>.</p>
+                </div>
+
+                <div class="payoff-matrix">
+                    <h3>Payoff Matrix</h3>
+                    <table>
+                        <tr>
+                            <th></th>
+                            <th>Opponent Cooperates</th>
+                            <th>Opponent Defects</th>
+                        </tr>
+                        <tr>
+                            <th>You Cooperate</th>
+                            <td class="both-cooperate">+3 / +3</td>
+                            <td class="sucker">0 / +5</td>
+                        </tr>
+                        <tr>
+                            <th>You Defect</th>
+                            <td class="temptation">+5 / 0</td>
+                            <td class="both-defect">+1 / +1</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <button class="btn-primary" onclick="gameController.startPlayground()">Start Playing</button>
+            </section>
+
+            <!-- Playground Section -->
+            <section id="playground" class="game-section">
+                <h2>Meet the Strategies</h2>
+                <div class="narrative-text">
+                    <p id="strategy-description">Let's play against different strategies...</p>
+                </div>
+
+                <div class="game-board">
+                    <div class="player-area">
+                        <h3>You</h3>
+                        <div id="player-visual" class="agent-visual"></div>
+                        <div class="score">Score: <span id="player-score">0</span></div>
+                    </div>
+
+                    <div class="vs-area">
+                        <div id="round-info">Round <span id="current-round">1</span> / <span id="total-rounds">10</span></div>
+                        <div id="last-result"></div>
+                    </div>
+
+                    <div class="opponent-area">
+                        <h3 id="opponent-name">Opponent</h3>
+                        <div id="opponent-visual" class="agent-visual"></div>
+                        <div class="score">Score: <span id="opponent-score">0</span></div>
+                    </div>
+                </div>
+
+                <div class="history-container">
+                    <h4>History</h4>
+                    <div id="history-display"></div>
+                </div>
+
+                <div class="action-buttons">
+                    <button id="cooperate-btn" class="btn-cooperate" onclick="gameController.playerMove('cooperate')">
+                        🤝 Cooperate
+                    </button>
+                    <button id="defect-btn" class="btn-defect" onclick="gameController.playerMove('defect')">
+                        💔 Defect
+                    </button>
+                </div>
+
+                <button id="next-strategy-btn" class="btn-secondary" style="display: none;" onclick="gameController.nextStrategy()">
+                    Next Strategy
+                </button>
+            </section>
+
+            <!-- Evolution Section -->
+            <section id="evolution" class="game-section">
+                <h2>Evolution Simulation</h2>
+                <div class="narrative-text">
+                    <p>Now let's see what happens when these strategies compete in a population...</p>
+                    <p>Each generation, successful strategies reproduce and unsuccessful ones die out.</p>
+                </div>
+
+                <div id="evolution-canvas-container"></div>
+
+                <div class="evolution-controls">
+                    <div class="evolution-stats">
+                        <div>Generation: <span id="generation">0</span> / 50</div>
+                        <div>Population: <span id="population-size">100</span></div>
+                    </div>
+                    <button id="start-evolution-btn" class="btn-primary" onclick="gameController.startEvolution()">
+                        Start Evolution
+                    </button>
+                    <button id="pause-evolution-btn" class="btn-secondary" style="display: none;" onclick="gameController.pauseEvolution()">
+                        Pause
+                    </button>
+                    <button id="reset-evolution-btn" class="btn-secondary" onclick="gameController.resetEvolution()">
+                        Reset
+                    </button>
+                </div>
+
+                <div id="population-chart"></div>
+
+                <button class="btn-primary" onclick="gameController.startSandbox()">Try Sandbox Mode</button>
+            </section>
+
+            <!-- Sandbox Section -->
+            <section id="sandbox" class="game-section">
+                <h2>Sandbox Mode</h2>
+                <div class="narrative-text">
+                    <p>Adjust parameters and see how they affect the evolution of trust.</p>
+                </div>
+
+                <div class="sandbox-controls">
+                    <div class="control-group">
+                        <label>Population Size: <span id="sandbox-pop-value">100</span></label>
+                        <input type="range" id="sandbox-population" min="20" max="200" value="100" step="10">
+                    </div>
+                    <div class="control-group">
+                        <label>Rounds per Match: <span id="sandbox-rounds-value">10</span></label>
+                        <input type="range" id="sandbox-rounds" min="3" max="20" value="10">
+                    </div>
+                    <div class="control-group">
+                        <label>Mutation Rate: <span id="sandbox-mutation-value">5</span>%</label>
+                        <input type="range" id="sandbox-mutation" min="0" max="20" value="5">
+                    </div>
+                    <div class="control-group">
+                        <label>Noise Rate: <span id="sandbox-noise-value">2</span>%</label>
+                        <input type="range" id="sandbox-noise" min="0" max="10" value="2">
+                    </div>
+                </div>
+
+                <div id="sandbox-canvas-container"></div>
+
+                <div class="sandbox-buttons">
+                    <button class="btn-primary" onclick="gameController.runSandboxSimulation()">Run Simulation</button>
+                    <button class="btn-secondary" onclick="gameController.resetSandbox()">Reset</button>
+                </div>
+
+                <div id="sandbox-results"></div>
+            </section>
+        </main>
+
+        <footer>
+            <p>Inspired by Nicky Case's "Evolution of Trust" | Built with game theory and love</p>
+        </footer>
+    </div>
+
+    <script src="game.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

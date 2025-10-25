@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Integration Test - Evolution of Trust</title>
+    <style>
+        body {
+            font-family: 'Courier New', monospace;
+            background: #1e1e1e;
+            color: #00ff00;
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .test-result {
+            margin: 10px 0;
+            padding: 10px;
+            border-left: 3px solid #00ff00;
+        }
+        .test-result.pass {
+            background: rgba(0, 255, 0, 0.1);
+        }
+        .test-result.fail {
+            background: rgba(255, 0, 0, 0.1);
+            border-left-color: #ff0000;
+            color: #ff0000;
+        }
+        .summary {
+            margin-top: 30px;
+            padding: 20px;
+            background: rgba(0, 255, 0, 0.2);
+            border: 2px solid #00ff00;
+            font-size: 1.2em;
+        }
+        button {
+            background: #00ff00;
+            color: #1e1e1e;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.1em;
+            cursor: pointer;
+            margin: 20px 0;
+        }
+        button:hover {
+            background: #00cc00;
+        }
+        #game-frame {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Integration Test Suite</h1>
+    <p>Testing Evolution of Trust Game</p>
+
+    <button onclick="runTests()">Run All Tests</button>
+
+    <div id="test-output"></div>
+
+    <iframe id="game-frame" src="index.html" width="1" height="1"></iframe>
+
+    <script>
+        let testResults = [];
+
+        function addTest(name, passed, message = '') {
+            testResults.push({ name, passed, message });
+            const output = document.getElementById('test-output');
+            const div = document.createElement('div');
+            div.className = `test-result ${passed ? 'pass' : 'fail'}`;
+            div.innerHTML = `
+                <strong>${passed ? '✅' : '❌'} ${name}</strong>
+                ${message ? `<br><span style="margin-left: 20px;">${message}</span>` : ''}
+            `;
+            output.appendChild(div);
+        }
+
+        async function runTests() {
+            document.getElementById('test-output').innerHTML = '';
+            testResults = [];
+
+            console.log('🧪 Starting Integration Tests...');
+
+            // Test 1: Files Load
+            addTest('Test 1: HTML File Loads', true, 'Main HTML file is accessible');
+
+            // Test 2: Check if game.js is loaded and exports are available
+            try {
+                const gameLoaded = typeof Agent !== 'undefined' &&
+                                  typeof Game !== 'undefined' &&
+                                  typeof Population !== 'undefined';
+                addTest('Test 2: Game Logic Loaded', gameLoaded,
+                    gameLoaded ? 'All game classes are defined' : 'Game classes missing');
+            } catch (e) {
+                addTest('Test 2: Game Logic Loaded', false, e.message);
+            }
+
+            // Test 3: Check if all strategies are defined
+            try {
+                const strategiesDefined = typeof STRATEGIES !== 'undefined' &&
+                                         Object.keys(STRATEGIES).length === 6;
+                addTest('Test 3: All 6 Strategies Defined', strategiesDefined,
+                    strategiesDefined ? 'Cooperator, Defector, Tit for Tat, Grudger, Random, Detective' : 'Missing strategies');
+            } catch (e) {
+                addTest('Test 3: All 6 Strategies Defined', false, e.message);
+            }
+
+            // Test 4: Create test agents
+            try {
+                const testAgent1 = new Agent(STRATEGIES.COOPERATOR);
+                const testAgent2 = new Agent(STRATEGIES.DEFECTOR);
+                addTest('Test 4: Agent Creation', true, 'Successfully created test agents');
+            } catch (e) {
+                addTest('Test 4: Agent Creation', false, e.message);
+            }
+
+            // Test 5: Test game mechanics
+            try {
+                const a1 = new Agent(STRATEGIES.COOPERATOR);
+                const a2 = new Agent(STRATEGIES.COOPERATOR);
+                const game = new Game(a1, a2, 3);
+                game.playAll();
+                const scores = game.getScores();
+                const passed = scores.agentA === 9 && scores.agentB === 9;
+                addTest('Test 5: Game Mechanics', passed,
+                    passed ? 'Both cooperators got 9 points (3x3 rounds)' : `Unexpected scores: ${scores.agentA}, ${scores.agentB}`);
+            } catch (e) {
+                addTest('Test 5: Game Mechanics', false, e.message);
+            }
+
+            // Test 6: Test payoff calculations
+            try {
+                const cooperator = new Agent(STRATEGIES.COOPERATOR);
+                const defector = new Agent(STRATEGIES.DEFECTOR);
+                const game = new Game(cooperator, defector, 1);
+                game.playAll();
+                const scores = game.getScores();
+                const passed = scores.agentA === 0 && scores.agentB === 5;
+                addTest('Test 6: Payoff Matrix', passed,
+                    passed ? 'Cooperator gets 0, Defector gets 5' : `Wrong payoffs: ${scores.agentA}, ${scores.agentB}`);
+            } catch (e) {
+                addTest('Test 6: Payoff Matrix', false, e.message);
+            }
+
+            // Test 7: Test Tit for Tat
+            try {
+                const tft = new Agent(STRATEGIES.TIT_FOR_TAT);
+                const firstMove = tft.decide([], 0);
+                const secondMove = tft.decide(['cooperate'], 1);
+                const thirdMove = tft.decide(['cooperate', 'defect'], 2);
+                const passed = firstMove === 'cooperate' &&
+                              secondMove === 'cooperate' &&
+                              thirdMove === 'defect';
+                addTest('Test 7: Tit for Tat Logic', passed,
+                    passed ? 'Starts with cooperate, mirrors opponent' : 'Tit for Tat not working correctly');
+            } catch (e) {
+                addTest('Test 7: Tit for Tat Logic', false, e.message);
+            }
+
+            // Test 8: Test Grudger
+            try {
+                const grudger = new Agent(STRATEGIES.GRUDGER);
+                const move1 = grudger.decide([], 0);
+                const move2 = grudger.decide(['cooperate'], 1);
+                const move3 = grudger.decide(['cooperate', 'defect'], 2);
+                const move4 = grudger.decide(['cooperate', 'defect', 'cooperate'], 3);
+                const passed = move1 === 'cooperate' &&
+                              move2 === 'cooperate' &&
+                              move3 === 'defect' &&
+                              move4 === 'defect';
+                addTest('Test 8: Grudger Logic', passed,
+                    passed ? 'Holds grudge after first betrayal' : 'Grudger not working correctly');
+            } catch (e) {
+                addTest('Test 8: Grudger Logic', false, e.message);
+            }
+
+            // Test 9: Test Detective
+            try {
+                const detective = new Agent(STRATEGIES.DETECTIVE);
+                const move1 = detective.decide([], 0);
+                const move2 = detective.decide(['cooperate'], 1);
+                const move3 = detective.decide(['cooperate', 'cooperate'], 2);
+                const move4 = detective.decide(['cooperate', 'cooperate', 'cooperate'], 3);
+                const passed = move1 === 'cooperate' &&
+                              move2 === 'defect' &&
+                              move3 === 'cooperate' &&
+                              move4 === 'cooperate';
+                addTest('Test 9: Detective Pattern', passed,
+                    passed ? 'Follows C, D, C, C pattern' : 'Detective pattern incorrect');
+            } catch (e) {
+                addTest('Test 9: Detective Pattern', false, e.message);
+            }
+
+            // Test 10: Test Population
+            try {
+                const pop = new Population({ populationSize: 60 });
+                const dist = pop.getDistribution();
+                const totalAgents = Object.values(dist).reduce((sum, count) => sum + count, 0);
+                const passed = totalAgents === 60;
+                addTest('Test 10: Population Initialization', passed,
+                    passed ? 'Population has correct size (60)' : `Population size: ${totalAgents}`);
+            } catch (e) {
+                addTest('Test 10: Population Initialization', false, e.message);
+            }
+
+            // Test 11: Test Evolution
+            try {
+                const pop = new Population({ populationSize: 50 });
+                pop.evolve();
+                const passed = pop.generation === 1 && pop.agents.length === 50;
+                addTest('Test 11: Evolution Mechanism', passed,
+                    passed ? 'Population evolved to generation 1' : 'Evolution not working');
+            } catch (e) {
+                addTest('Test 11: Evolution Mechanism', false, e.message);
+            }
+
+            // Test 12: Check GameController
+            try {
+                const controllerExists = typeof gameController !== 'undefined';
+                addTest('Test 12: Game Controller Loaded', controllerExists,
+                    controllerExists ? 'Main controller initialized' : 'Controller missing');
+            } catch (e) {
+                addTest('Test 12: Game Controller Loaded', false, e.message);
+            }
+
+            // Display summary
+            setTimeout(() => {
+                const passed = testResults.filter(t => t.passed).length;
+                const failed = testResults.filter(t => !t.passed).length;
+                const total = testResults.length;
+
+                const summaryDiv = document.createElement('div');
+                summaryDiv.className = 'summary';
+                summaryDiv.innerHTML = `
+                    <strong>Test Summary</strong><br>
+                    Total Tests: ${total}<br>
+                    Passed: ${passed} ✅<br>
+                    Failed: ${failed} ${failed > 0 ? '❌' : '✅'}<br>
+                    Success Rate: ${((passed/total)*100).toFixed(1)}%
+                    ${failed === 0 ? '<br><br>🎉 All tests passed! The game is ready to play!' : ''}
+                `;
+                document.getElementById('test-output').appendChild(summaryDiv);
+
+                console.log(`✅ ${passed}/${total} tests passed`);
+            }, 100);
+        }
+
+        // Auto-run tests when page loads
+        window.addEventListener('load', () => {
+            setTimeout(runTests, 500);
+        });
+    </script>
+</body>
+</html>
