@@ -63,7 +63,9 @@ class GameController {
     handleRoute(hash) {
         // Remove # and get route
         const hashWithoutSymbol = hash.replace(/^#/, '');
-        const route = hashWithoutSymbol.split('?')[0] || '';
+        const routeParts = hashWithoutSymbol.split('?')[0].split('/');
+        const route = routeParts[0] || '';
+        const gameId = routeParts[1] || null;
 
         switch (route) {
             case '':
@@ -80,6 +82,26 @@ class GameController {
                 // Don't auto-navigate if we're already in sandbox
                 if (this.currentSection !== 'sandbox') {
                     this.startSandbox(true);
+                }
+                break;
+            case 'multiplayer':
+                // Navigate to multiplayer section
+                if (this.currentSection !== 'multiplayer') {
+                    this.showSection('multiplayer');
+                }
+
+                // Ensure a crypto screen is shown
+                if (window.cryptoGame) {
+                    // If there's a game ID, set it as pending (will load after wallet connection)
+                    if (gameId) {
+                        window.cryptoGame.setPendingGame(gameId);
+                    } else {
+                        // No game ID, just show connect screen
+                        window.cryptoGame.showCryptoScreen('crypto-connect');
+                    }
+                } else {
+                    // cryptoGame not initialized yet, it will handle the game ID when it loads
+                    console.log('cryptoGame not initialized yet, waiting for initialization');
                 }
                 break;
             case 'complete':
@@ -180,6 +202,7 @@ class GameController {
                 'tutorial': '',
                 'playground': 'play',
                 'sandbox': 'sandbox',
+                'multiplayer': 'multiplayer',
                 'evolution': 'play'
             };
             const route = routeMap[sectionId] || '';

@@ -90,6 +90,15 @@
                         </div>
                     </div>
                 </div>
+
+                <div class="multiplayer-section">
+                    <h3>🌐 Web3 Multiplayer</h3>
+                    <div class="multiplayer-intro">
+                        <p><strong>A web3 social experiment about cooperation, betrayal, and skin-in-the-game.</strong></p>
+                        <p>Play against real opponents with real stakes. Connect your wallet, stake 0.001 ETH, and compete in a 10-round prisoner's dilemma. Winner takes all. Blockchain makes <em>trustless</em> systems possible—but can it also help us rebuild <em>trustworthy</em> ones?</p>
+                        <button class="btn-crypto" onclick="gameController.navigateTo('multiplayer')">🔗 Connect & Play</button>
+                    </div>
+                </div>
             </section>
 
             <!-- Playground Section -->
@@ -278,6 +287,191 @@
 
                 <div id="sandbox-results"></div>
             </section>
+
+            <!-- Multiplayer Section -->
+            <section id="multiplayer" class="game-section crypto-section">
+                <!-- Connect Wallet Screen -->
+                <div id="crypto-connect" class="crypto-screen active">
+                    <div class="crypto-hero">
+                        <h2>🌐 Multiplayer mode</h2>
+                        <p class="crypto-tagline">A web3 social experiment about cooperation, betrayal, and skin-in-the-game.</p>
+                    </div>
+
+                    <div class="crypto-explainer">
+                        <h3>How It Works</h3>
+                        <div class="crypto-steps">
+                            <div class="crypto-step">
+                                <div class="step-number">1</div>
+                                <div class="step-content">
+                                    <h4>Connect & Stake</h4>
+                                    <p>Connect your Ethereum wallet and stake 0.001 ETH to join the game</p>
+                                </div>
+                            </div>
+                            <div class="crypto-step">
+                                <div class="step-number">2</div>
+                                <div class="step-content">
+                                    <h4>Get Matched</h4>
+                                    <p>Wait to be matched with another player who's also staked</p>
+                                </div>
+                            </div>
+                            <div class="crypto-step">
+                                <div class="step-number">3</div>
+                                <div class="step-content">
+                                    <h4>Play 10 Rounds</h4>
+                                    <p>Choose to Trust or Cheat each round. Your choices affect both scores</p>
+                                </div>
+                            </div>
+                            <div class="crypto-step">
+                                <div class="step-number">4</div>
+                                <div class="step-content">
+                                    <h4>Winner Takes All</h4>
+                                    <p>Highest score wins 0.002 ETH. Tie? Funds split evenly</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="wallet-connect-container">
+                        <button id="connect-wallet-btn" class="btn-crypto btn-large" onclick="cryptoGame.connectWallet()">
+                            🔗 Connect Wallet to Play
+                        </button>
+                        <p class="wallet-status" id="wallet-status">No wallet connected</p>
+                        <p class="network-info">Required Network: <strong>Base Sepolia</strong></p>
+                    </div>
+
+
+
+                    <!-- My Games Section -->
+                    <div class="my-games-section">
+                        <h3>🎮 My Games</h3>
+                        <div id="my-games-container">
+                            <p class="loading-history">Connect wallet to view your games</p>
+                        </div>
+                    </div>
+
+                    <!-- Game History Section -->
+                    <div class="game-history-section">
+                        <h3>📜 Recent Games</h3>
+                        <div id="game-history-container">
+                            <p class="loading-history">Connect wallet to view game history</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Lobby Screen -->
+                <div id="crypto-lobby" class="crypto-screen">
+                    <h2>⏳ Waiting for Opponent...</h2>
+                    <div class="lobby-info">
+                        <p>Your stake: <strong>0.001 ETH</strong></p>
+                        <p>Your address: <span id="player-address">0x...</span></p>
+                        <p id="game-id-display">Game ID: <span id="current-game-id">--</span></p>
+                    </div>
+                    <div class="lobby-spinner">
+                        <div class="spinner"></div>
+                        <p>Searching for an opponent who's also staked...</p>
+                    </div>
+                    <div class="lobby-actions">
+                        <button class="btn-secondary" onclick="cryptoGame.cancelGame()">Cancel & Withdraw</button>
+                    </div>
+                </div>
+
+                <!-- Game Board Screen -->
+                <div id="crypto-game" class="crypto-screen">
+                    <div class="crypto-game-header">
+                        <h2>Round <span id="crypto-round">1</span> / 10</h2>
+                        <div class="educational-snippet" id="educational-snippet">
+                            <p>Choose wisely. Your opponent is choosing simultaneously.</p>
+                        </div>
+                    </div>
+
+                    <div class="crypto-game-board">
+                        <div class="crypto-player-area">
+                            <div class="player-identity">
+                                <div class="player-avatar">👤</div>
+                                <div class="player-info">
+                                    <div class="player-label">You</div>
+                                    <div class="player-ens" id="player-ens">0x...</div>
+                                </div>
+                            </div>
+                            <div class="player-score-display">
+                                Score: <span id="crypto-player-score">0</span>
+                            </div>
+                        </div>
+
+                        <div class="crypto-vs-area">
+                            <div id="crypto-round-result" class="round-result"></div>
+                        </div>
+
+                        <div class="crypto-opponent-area">
+                            <div class="player-identity">
+                                <div class="player-avatar">🎭</div>
+                                <div class="player-info">
+                                    <div class="player-label">Opponent</div>
+                                    <div class="player-ens" id="opponent-ens">0x...</div>
+                                </div>
+                            </div>
+                            <div class="player-score-display">
+                                Score: <span id="crypto-opponent-score">0</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="crypto-history">
+                        <h4>Round History</h4>
+                        <div id="crypto-history-display"></div>
+                    </div>
+
+                    <div class="crypto-action-buttons">
+                        <button id="trust-btn" class="btn-trust btn-large" onclick="cryptoGame.submitMove(true)">
+                            🤝 Trust
+                        </button>
+                        <button id="cheat-btn" class="btn-cheat btn-large" onclick="cryptoGame.submitMove(false)">
+                            💔 Cheat
+                        </button>
+                    </div>
+
+                    <div id="waiting-message" class="waiting-message" style="display: none;">
+                        Waiting for opponent's move...
+                    </div>
+                </div>
+
+                <!-- Results Screen -->
+                <div id="crypto-results" class="crypto-screen">
+                    <h2 id="game-outcome-title">🎉 Game Complete!</h2>
+
+                    <div class="crypto-results-summary">
+                        <div class="result-card">
+                            <div class="result-label">Your Score</div>
+                            <div class="result-value" id="final-player-score">0</div>
+                        </div>
+                        <div class="result-card">
+                            <div class="result-label">Opponent Score</div>
+                            <div class="result-value" id="final-opponent-score">0</div>
+                        </div>
+                        <div class="result-card highlight">
+                            <div class="result-label">Prize</div>
+                            <div class="result-value">0.002 ETH</div>
+                        </div>
+                    </div>
+
+                    <div class="payout-status" id="payout-status">
+                        <p>Processing payout...</p>
+                    </div>
+
+                    <div class="game-reflection">
+                        <blockquote>
+                            "In crypto, we built systems that don't require trust.<br>
+                            The next challenge is building systems that <em>deserve</em> it."
+                        </blockquote>
+                    </div>
+
+                    <div class="crypto-results-actions">
+                        <button class="btn-crypto" onclick="cryptoGame.playAgain()">Play Again</button>
+                        <button class="btn-secondary" onclick="cryptoGame.shareResults()">Share Results</button>
+                        <button class="btn-secondary" onclick="gameController.goToHome()">Back to Menu</button>
+                    </div>
+                </div>
+            </section>
         </main>
 
         <footer>
@@ -287,5 +481,11 @@
 
     <script src="game.js"></script>
     <script src="app.js"></script>
+
+    <!-- Load ethers.js from CDN before crypto-game -->
+    <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+
+    <!-- Initialize crypto game after ethers is loaded -->
+    <script src="crypto-game.js"></script>
 </body>
 </html>
