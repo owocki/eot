@@ -33,6 +33,12 @@
                     </div>
 
                     <div class="concept-card">
+                        <span class="concept-card-icon">💎</span>
+                        <h3>The Payoffs</h3>
+                        <p>Mutual cooperation earns +3 each. Mutual defection earns only +1 each. But if you defect while they cooperate, you get +5 and they get nothing. The temptation to betray is strong—but risky.</p>
+                    </div>
+
+                    <div class="concept-card">
                         <span class="concept-card-icon">🌍</span>
                         <h3>Why It Matters</h3>
                         <p>This simple dynamic appears everywhere: climate agreements, business partnerships, international relations, and everyday social interactions. It's the fundamental tension between individual gain and collective good.</p>
@@ -42,6 +48,12 @@
                         <span class="concept-card-icon">🔄</span>
                         <h3>Repeated Interactions</h3>
                         <p>When the game repeats, everything changes. Strategies emerge: some always cooperate, others always defect, some retaliate when betrayed, others forgive. Reputation matters. History matters.</p>
+                    </div>
+
+                    <div class="concept-card">
+                        <span class="concept-card-icon">🎭</span>
+                        <h3>Competing Strategies</h3>
+                        <p>Meet different AI opponents: the eternal optimist who always trusts, the cynic who never does, the reciprocator who mirrors your moves, and the grudge-holder who never forgives. Each has strengths and weaknesses.</p>
                     </div>
 
                     <div class="concept-card">
@@ -187,24 +199,36 @@
             <section id="sandbox" class="game-section">
                 <h2>Sandbox Mode</h2>
                 <div class="narrative-text">
-                    <p>Adjust parameters and see how they affect the evolution of trust.</p>
+                    <p>Experiment with different parameters to see how they shape the evolution of cooperation. Each setting creates a different environment where strategies must adapt and compete.</p>
                 </div>
 
                 <div class="sandbox-controls">
                     <div class="control-group">
-                        <label>Population Size: <span id="sandbox-pop-value">100</span></label>
+                        <label>
+                            <strong>Population Size: <span id="sandbox-pop-value">100</span></strong>
+                            <span class="param-description">Total number of agents competing in the simulation. Larger populations create more diverse ecosystems but take longer to evolve.</span>
+                        </label>
                         <input type="range" id="sandbox-population" min="20" max="200" value="100" step="10">
                     </div>
                     <div class="control-group">
-                        <label>Rounds per Match: <span id="sandbox-rounds-value">7</span></label>
+                        <label>
+                            <strong>Rounds per Match: <span id="sandbox-rounds-value">7</span></strong>
+                            <span class="param-description">How many times each pair of agents interact. More rounds allow complex strategies like Tit for Tat to prove their worth, while fewer rounds favor simple strategies.</span>
+                        </label>
                         <input type="range" id="sandbox-rounds" min="3" max="20" value="7">
                     </div>
                     <div class="control-group">
-                        <label>Mutation Rate: <span id="sandbox-mutation-value">5</span>%</label>
+                        <label>
+                            <strong>Mutation Rate: <span id="sandbox-mutation-value">5</span>%</strong>
+                            <span class="param-description">Chance that an agent randomly changes strategy when reproducing. Higher rates maintain diversity but disrupt stable populations. Zero creates pure competition.</span>
+                        </label>
                         <input type="range" id="sandbox-mutation" min="0" max="20" value="5">
                     </div>
                     <div class="control-group">
-                        <label>Noise Rate: <span id="sandbox-noise-value">2</span>%</label>
+                        <label>
+                            <strong>Noise Rate: <span id="sandbox-noise-value">2</span>%</strong>
+                            <span class="param-description">Probability that an agent makes a mistake (cooperates when they meant to defect, or vice versa). Higher noise makes cooperation harder and punishes unforgiving strategies.</span>
+                        </label>
                         <input type="range" id="sandbox-noise" min="0" max="10" value="2">
                     </div>
                 </div>

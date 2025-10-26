@@ -594,6 +594,25 @@ h3 {
 .control-group label {
     font-weight: bold;
     color: #555;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.control-group label strong {
+    color: #667eea;
+    font-size: 1.05em;
+}
+
+.param-description {
+    font-weight: normal;
+    font-size: 0.9em;
+    color: #666;
+    line-height: 1.5;
+    padding: 8px 12px;
+    background: rgba(102, 126, 234, 0.05);
+    border-radius: 6px;
+    border-left: 3px solid #667eea;
 }
 
 .control-group input[type="range"] {
