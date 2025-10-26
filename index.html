@@ -57,9 +57,9 @@
                     </div>
 
                     <div class="concept-card">
-                        <span class="concept-card-icon">🧬</span>
-                        <h3>Evolution in Action</h3>
-                        <p>Watch strategies compete in a living population. Successful strategies reproduce, unsuccessful ones die out. Discover which approaches thrive, which collapse, and why cooperation can emerge—or fail.</p>
+                        <span class="concept-card-icon">🔬</span>
+                        <h3>Experiment & Discover</h3>
+                        <p>Test your strategies against different AI opponents in the game, then experiment in the sandbox to see how different payoff structures and parameters affect which strategies succeed or fail.</p>
                     </div>
                 </div>
 
@@ -76,12 +76,6 @@
                             <h4>Play the Game</h4>
                             <p>Face different AI strategies and learn their patterns</p>
                             <button class="btn-primary" onclick="gameController.startPlayground()">Start Playing</button>
-                        </div>
-                        <div class="option-card">
-                            <div class="option-emoji">🧬</div>
-                            <h4>Evolution Simulator</h4>
-                            <p>Watch strategies compete and evolve over generations</p>
-                            <button class="btn-primary" onclick="gameController.startEvolutionFromMenu()">Launch Simulator</button>
                         </div>
                         <div class="option-card">
                             <div class="option-emoji">🔬</div>
@@ -101,7 +95,7 @@
                 </div>
 
                 <div class="payoff-matrix">
-                    <h3>Payoff Matrix</h3>
+                    <h3>Payoff Matrix <span id="custom-params-indicator" style="display: none; color: #667eea; font-size: 0.8em;">(Custom Settings)</span></h3>
                     <table>
                         <tr>
                             <th></th>
@@ -110,13 +104,13 @@
                         </tr>
                         <tr>
                             <th>You Cooperate</th>
-                            <td class="both-cooperate">+3 / +3</td>
-                            <td class="sucker">0 / +5</td>
+                            <td class="both-cooperate"><span id="playground-both-cooperate">+3 / +3</span></td>
+                            <td class="sucker"><span id="playground-sucker">0 / +5</span></td>
                         </tr>
                         <tr>
                             <th>You Defect</th>
-                            <td class="temptation">+5 / 0</td>
-                            <td class="both-defect">+1 / +1</td>
+                            <td class="temptation"><span id="playground-temptation">+5 / 0</span></td>
+                            <td class="both-defect"><span id="playground-both-defect">+1 / +1</span></td>
                         </tr>
                     </table>
                 </div>
@@ -157,42 +151,6 @@
                 <button id="next-strategy-btn" class="btn-secondary" style="display: none;" onclick="gameController.nextStrategy()">
                     Next Strategy
                 </button>
-            </section>
-
-            <!-- Evolution Section -->
-            <section id="evolution" class="game-section">
-                <h2>Evolution Simulation</h2>
-                <div class="narrative-text">
-                    <p>Now let's see what happens when these strategies compete in a population...</p>
-                    <p>Each generation, successful strategies reproduce and unsuccessful ones die out.</p>
-                </div>
-
-                <div class="evolution-controls">
-                    <div class="evolution-stats">
-                        <div>Generation: <span id="generation">0</span> / 50</div>
-                        <div>Population: <span id="population-size">100</span></div>
-                    </div>
-                    <button id="start-evolution-btn" class="btn-primary" onclick="gameController.startEvolution()">
-                        Start Evolution
-                    </button>
-                    <button id="pause-evolution-btn" class="btn-secondary" style="display: none;" onclick="gameController.pauseEvolution()">
-                        Pause
-                    </button>
-                    <button id="reset-evolution-btn" class="btn-secondary" onclick="gameController.resetEvolution()">
-                        Reset
-                    </button>
-                    <button id="toggle-details-btn" class="btn-secondary" onclick="gameController.toggleEvolutionDetails()">
-                        📊 Show Details
-                    </button>
-                </div>
-
-                <div id="evolution-canvas-container" class="hidden">
-                    <div id="evolution-details" class="evolution-log"></div>
-                </div>
-
-                <div id="population-chart"></div>
-
-                <button class="btn-primary" onclick="gameController.startSandbox()">Try Sandbox Mode</button>
             </section>
 
             <!-- Sandbox Section -->
@@ -286,13 +244,20 @@
 
                 <div class="sandbox-buttons">
                     <button class="btn-primary" onclick="gameController.runSandboxSimulation()">Run Simulation</button>
+                    <button class="btn-primary" onclick="gameController.playWithCustomParams()">🎮 Play with These Settings</button>
                     <button class="btn-secondary" onclick="gameController.resetSandbox()">Reset</button>
+                    <button id="toggle-sandbox-log-btn" class="btn-secondary" onclick="gameController.toggleSandboxLog()">📊 Show Match Log</button>
                 </div>
 
                 <div class="sandbox-stats">
                     <div>Generation: <span id="sandbox-generation">0</span> / 50</div>
                     <div>Population: <span id="sandbox-population-size">100</span></div>
                     <div>Status: <span id="sandbox-status">Ready</span></div>
+                </div>
+
+                <div id="sandbox-log-container" class="hidden">
+                    <h4>Match Log</h4>
+                    <div id="sandbox-log" class="sandbox-log"></div>
                 </div>
 
                 <div id="sandbox-population-chart"></div>

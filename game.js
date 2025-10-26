@@ -172,13 +172,14 @@ class Agent {
  * Game class - manages a single match between two agents
  */
 class Game {
-    constructor(agentA, agentB, rounds = 10, noiseRate = 0) {
+    constructor(agentA, agentB, rounds = 10, noiseRate = 0, customPayoffs = null) {
         this.agentA = agentA;
         this.agentB = agentB;
         this.rounds = rounds;
         this.noiseRate = noiseRate;
         this.currentRound = 0;
         this.history = [];
+        this.payoffs = customPayoffs || PAYOFFS;
     }
 
     /**
@@ -191,17 +192,17 @@ class Game {
         // Calculate payoffs
         let payoffA, payoffB;
         if (moveA === 'cooperate' && moveB === 'cooperate') {
-            payoffA = PAYOFFS.BOTH_COOPERATE.player;
-            payoffB = PAYOFFS.BOTH_COOPERATE.opponent;
+            payoffA = this.payoffs.BOTH_COOPERATE.player;
+            payoffB = this.payoffs.BOTH_COOPERATE.opponent;
         } else if (moveA === 'cooperate' && moveB === 'defect') {
-            payoffA = PAYOFFS.PLAYER_COOPERATE_OPP_DEFECT.player;
-            payoffB = PAYOFFS.PLAYER_COOPERATE_OPP_DEFECT.opponent;
+            payoffA = this.payoffs.PLAYER_COOPERATE_OPP_DEFECT.player;
+            payoffB = this.payoffs.PLAYER_COOPERATE_OPP_DEFECT.opponent;
         } else if (moveA === 'defect' && moveB === 'cooperate') {
-            payoffA = PAYOFFS.PLAYER_DEFECT_OPP_COOPERATE.player;
-            payoffB = PAYOFFS.PLAYER_DEFECT_OPP_COOPERATE.opponent;
+            payoffA = this.payoffs.PLAYER_DEFECT_OPP_COOPERATE.player;
+            payoffB = this.payoffs.PLAYER_DEFECT_OPP_COOPERATE.opponent;
         } else {
-            payoffA = PAYOFFS.BOTH_DEFECT.player;
-            payoffB = PAYOFFS.BOTH_DEFECT.opponent;
+            payoffA = this.payoffs.BOTH_DEFECT.player;
+            payoffB = this.payoffs.BOTH_DEFECT.opponent;
         }
 
         // Update scores
@@ -309,12 +310,13 @@ class Population {
     /**
      * Run a tournament where each agent plays against random opponents
      */
-    runTournament() {
+    runTournament(logMatches = false) {
         // Reset all agents
         this.agents.forEach(agent => agent.reset());
 
         // Each agent plays multiple matches
         const matchesPerAgent = 5;
+        const matchLog = [];
 
         for (let agent of this.agents) {
             for (let i = 0; i < matchesPerAgent; i++) {
@@ -325,15 +327,27 @@ class Population {
                 // Play game
                 const game = new Game(agent, opponent, this.roundsPerMatch, this.noiseRate);
                 game.playAll();
+
+                // Log match if requested (only log first few to avoid performance issues)
+                if (logMatches && matchLog.length < 20) {
+                    matchLog.push({
+                        agentA: agent.strategy,
+                        agentB: opponent.strategy,
+                        scoreA: agent.score,
+                        scoreB: opponent.score
+                    });
+                }
             }
         }
+
+        return matchLog;
     }
 
     /**
      * Evolve to next generation
      */
-    evolve() {
-        this.runTournament();
+    evolve(logMatches = false) {
+        const matchLog = this.runTournament(logMatches);
 
         // Record current distribution
         this.history.push({
@@ -383,6 +397,8 @@ class Population {
 
         this.agents = newAgents;
         this.generation++;
+
+        return matchLog;
     }
 
     /**

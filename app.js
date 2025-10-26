@@ -15,9 +15,7 @@ class GameController {
         this.currentGame = null;
         this.playerAgent = null;
         this.opponentAgent = null;
-        this.population = null;
-        this.evolutionInterval = null;
-        this.p5Instance = null;
+        this.customParams = null; // Store custom parameters from sandbox
 
         this.initializeUI();
     }
@@ -108,9 +106,13 @@ class GameController {
     /**
      * Start Playground mode
      */
-    startPlayground() {
+    startPlayground(keepCustomParams = false) {
         this.showSection('playground');
         this.currentStrategyIndex = 0;
+        // Reset custom params unless we're coming from sandbox
+        if (!keepCustomParams) {
+            this.customParams = null;
+        }
         this.loadNextStrategy();
     }
 
@@ -119,14 +121,22 @@ class GameController {
      */
     loadNextStrategy() {
         if (this.currentStrategyIndex >= this.strategiesToTest.length) {
-            this.showSection('evolution');
+            // All strategies completed, return to tutorial
+            alert('Great job! You\'ve played against all strategies. Try the Sandbox to experiment with custom settings!');
+            this.showSection('tutorial');
             return;
         }
 
         const strategy = this.strategiesToTest[this.currentStrategyIndex];
         this.opponentAgent = new Agent(strategy);
         this.playerAgent = new Agent('player');
-        this.currentGame = new Game(this.playerAgent, this.opponentAgent, 7);
+
+        // Use custom parameters if available
+        const rounds = this.customParams?.rounds || 7;
+        const noiseRate = this.customParams?.noiseRate || 0;
+        const payoffs = this.customParams?.payoffs || null;
+
+        this.currentGame = new Game(this.playerAgent, this.opponentAgent, rounds, noiseRate, payoffs);
 
         this.updatePlaygroundUI();
         this.enableActionButtons();
@@ -138,15 +148,25 @@ class GameController {
     updatePlaygroundUI() {
         const info = this.opponentAgent.getInfo();
         document.getElementById('opponent-name').textContent = info.name;
-        document.getElementById('strategy-description').textContent = info.description;
+
+        // Update description with custom params info if applicable
+        let description = info.description;
+        if (this.customParams) {
+            description += ' (Using custom sandbox settings)';
+        }
+        document.getElementById('strategy-description').textContent = description;
+
+        // Update payoff matrix display
+        this.updatePlaygroundPayoffMatrix();
 
         // Reset scores
         document.getElementById('player-score').textContent = '0';
         document.getElementById('opponent-score').textContent = '0';
 
-        // Reset round counter
+        // Reset round counter with custom rounds if applicable
+        const totalRounds = this.customParams?.rounds || 7;
         document.getElementById('current-round').textContent = '1';
-        document.getElementById('total-rounds').textContent = '7';
+        document.getElementById('total-rounds').textContent = totalRounds;
 
         // Clear history
         document.getElementById('history-display').innerHTML = '';
@@ -162,6 +182,39 @@ class GameController {
 
         // Hide next strategy button
         document.getElementById('next-strategy-btn').style.display = 'none';
+    }
+
+    /**
+     * Update the playground payoff matrix to show custom values if applicable
+     */
+    updatePlaygroundPayoffMatrix() {
+        const indicator = document.getElementById('custom-params-indicator');
+
+        if (this.customParams && this.customParams.payoffs) {
+            const p = this.customParams.payoffs;
+
+            // Update matrix cells
+            document.getElementById('playground-both-cooperate').textContent =
+                `+${p.BOTH_COOPERATE.player} / +${p.BOTH_COOPERATE.opponent}`;
+            document.getElementById('playground-sucker').textContent =
+                `${p.PLAYER_COOPERATE_OPP_DEFECT.player} / +${p.PLAYER_COOPERATE_OPP_DEFECT.opponent}`;
+            document.getElementById('playground-temptation').textContent =
+                `+${p.PLAYER_DEFECT_OPP_COOPERATE.player} / ${p.PLAYER_DEFECT_OPP_COOPERATE.opponent}`;
+            document.getElementById('playground-both-defect').textContent =
+                `+${p.BOTH_DEFECT.player} / +${p.BOTH_DEFECT.opponent}`;
+
+            // Show indicator
+            indicator.style.display = 'inline';
+        } else {
+            // Reset to defaults
+            document.getElementById('playground-both-cooperate').textContent = '+3 / +3';
+            document.getElementById('playground-sucker').textContent = '0 / +5';
+            document.getElementById('playground-temptation').textContent = '+5 / 0';
+            document.getElementById('playground-both-defect').textContent = '+1 / +1';
+
+            // Hide indicator
+            indicator.style.display = 'none';
+        }
     }
 
     /**
@@ -341,200 +394,6 @@ class GameController {
         document.getElementById('defect-btn').disabled = true;
     }
 
-    /**
-     * Start evolution from menu
-     */
-    startEvolutionFromMenu() {
-        this.showSection('evolution');
-        this.resetEvolution();
-    }
-
-    /**
-     * Toggle evolution details panel
-     */
-    toggleEvolutionDetails() {
-        const container = document.getElementById('evolution-canvas-container');
-        const button = document.getElementById('toggle-details-btn');
-
-        if (container.classList.contains('hidden')) {
-            container.classList.remove('hidden');
-            button.textContent = '📊 Hide Details';
-        } else {
-            container.classList.add('hidden');
-            button.textContent = '📊 Show Details';
-        }
-    }
-
-    /**
-     * Log evolution event
-     */
-    logEvolutionEvent(message, isMilestone = false) {
-        const detailsDiv = document.getElementById('evolution-details');
-        if (!detailsDiv) return;
-
-        const entry = document.createElement('div');
-        entry.className = isMilestone ? 'log-entry milestone' : 'log-entry';
-
-        const generation = this.population ? this.population.generation : 0;
-        entry.innerHTML = `
-            <span class="timestamp">Gen ${generation}:</span>
-            <span class="event">${message}</span>
-        `;
-
-        detailsDiv.appendChild(entry);
-
-        // Auto-scroll to bottom
-        detailsDiv.scrollTop = detailsDiv.scrollHeight;
-
-        // Keep only last 50 entries to avoid memory issues
-        while (detailsDiv.children.length > 50) {
-            detailsDiv.removeChild(detailsDiv.firstChild);
-        }
-    }
-
-    /**
-     * Start evolution simulation
-     */
-    startEvolution() {
-        if (!this.population) {
-            this.population = new Population({
-                populationSize: 100,
-                roundsPerMatch: 7,
-                mutationRate: 0.05,
-                noiseRate: 0.02
-            });
-            this.updatePopulationChart();
-            this.logEvolutionEvent('🚀 Simulation started with 100 agents across 6 strategies', true);
-        } else {
-            this.logEvolutionEvent('▶️ Simulation resumed', true);
-        }
-
-        document.getElementById('start-evolution-btn').style.display = 'none';
-        document.getElementById('pause-evolution-btn').style.display = 'inline-block';
-
-        this.evolutionInterval = setInterval(() => {
-            const prevDistribution = this.population.getDistribution();
-            this.population.evolve();
-            this.updateEvolutionDisplay();
-
-            // Log significant events
-            const newDistribution = this.population.getDistribution();
-            this.logEvolutionChanges(prevDistribution, newDistribution);
-
-            if (this.population.generation >= 50) {
-                this.pauseEvolution();
-                this.logEvolutionEvent('🏁 Simulation completed after 50 generations', true);
-            }
-        }, 500);
-    }
-
-    /**
-     * Log changes between generations
-     */
-    logEvolutionChanges(prevDist, newDist) {
-        const gen = this.population.generation;
-
-        // Check for extinctions
-        Object.keys(prevDist).forEach(strategy => {
-            if (prevDist[strategy] > 0 && newDist[strategy] === 0) {
-                const info = STRATEGY_INFO[strategy];
-                this.logEvolutionEvent(`💀 ${info.emoji} ${info.name} went extinct`);
-            }
-        });
-
-        // Check for dominance (>70%)
-        Object.entries(newDist).forEach(([strategy, count]) => {
-            const percentage = (count / this.population.populationSize) * 100;
-            if (percentage > 70 && prevDist[strategy] / this.population.populationSize * 100 <= 70) {
-                const info = STRATEGY_INFO[strategy];
-                this.logEvolutionEvent(`👑 ${info.emoji} ${info.name} is now dominant (${percentage.toFixed(0)}%)`, true);
-            }
-        });
-
-        // Milestone generations
-        if (gen % 10 === 0 && gen > 0) {
-            const dominant = Object.entries(newDist).reduce((a, b) => a[1] > b[1] ? a : b);
-            const info = STRATEGY_INFO[dominant[0]];
-            this.logEvolutionEvent(`📊 Checkpoint: ${info.emoji} ${info.name} leads with ${dominant[1]} agents`, true);
-        }
-    }
-
-    /**
-     * Pause evolution simulation
-     */
-    pauseEvolution() {
-        if (this.evolutionInterval) {
-            clearInterval(this.evolutionInterval);
-            this.evolutionInterval = null;
-            this.logEvolutionEvent('⏸️ Simulation paused');
-        }
-        document.getElementById('start-evolution-btn').style.display = 'inline-block';
-        document.getElementById('pause-evolution-btn').style.display = 'none';
-    }
-
-    /**
-     * Reset evolution simulation
-     */
-    resetEvolution() {
-        this.pauseEvolution();
-        this.population = new Population({
-            populationSize: 100,
-            roundsPerMatch: 7,
-            mutationRate: 0.05,
-            noiseRate: 0.02
-        });
-        this.updateEvolutionDisplay();
-
-        // Clear the log
-        const detailsDiv = document.getElementById('evolution-details');
-        if (detailsDiv) {
-            detailsDiv.innerHTML = '';
-        }
-        this.logEvolutionEvent('🔄 Simulation reset to initial state', true);
-    }
-
-    /**
-     * Update evolution display
-     */
-    updateEvolutionDisplay() {
-        document.getElementById('generation').textContent = this.population.generation;
-        this.updatePopulationChart();
-    }
-
-    /**
-     * Update population chart
-     */
-    updatePopulationChart() {
-        const distribution = this.population.getDistribution();
-        const chartDiv = document.getElementById('population-chart');
-
-        if (!chartDiv.hasChildNodes()) {
-            // Create chart bars
-            Object.values(STRATEGIES).forEach(strategy => {
-                const info = STRATEGY_INFO[strategy];
-                const barDiv = document.createElement('div');
-                barDiv.className = 'strategy-bar';
-                barDiv.innerHTML = `
-                    <div class="label">${info.emoji} ${info.name}</div>
-                    <div class="bar-container">
-                        <div class="bar-fill strategy-${strategy}" data-strategy="${strategy}"></div>
-                    </div>
-                `;
-                chartDiv.appendChild(barDiv);
-            });
-        }
-
-        // Update bar widths
-        const total = this.population.populationSize;
-        Object.entries(distribution).forEach(([strategy, count]) => {
-            const percentage = (count / total) * 100;
-            const barFill = chartDiv.querySelector(`[data-strategy="${strategy}"]`);
-            if (barFill) {
-                barFill.style.width = percentage + '%';
-                barFill.textContent = count > 0 ? count : '';
-            }
-        });
-    }
 
     /**
      * Start sandbox mode
@@ -543,6 +402,38 @@ class GameController {
         this.showSection('sandbox');
         this.resetSandbox();
         this.initializeSandboxChart();
+    }
+
+    /**
+     * Get custom parameters from sandbox inputs
+     */
+    getCustomParamsFromSandbox() {
+        const reward = parseInt(document.getElementById('payoff-reward')?.value || 3);
+        const sucker = parseInt(document.getElementById('payoff-sucker')?.value || 0);
+        const temptation = parseInt(document.getElementById('payoff-temptation')?.value || 5);
+        const punishment = parseInt(document.getElementById('payoff-punishment')?.value || 1);
+
+        const rounds = parseInt(document.getElementById('sandbox-rounds')?.value || 7);
+        const noiseRate = parseInt(document.getElementById('sandbox-noise')?.value || 2) / 100;
+
+        return {
+            rounds: rounds,
+            noiseRate: noiseRate,
+            payoffs: {
+                BOTH_COOPERATE: { player: reward, opponent: reward },
+                PLAYER_COOPERATE_OPP_DEFECT: { player: sucker, opponent: temptation },
+                PLAYER_DEFECT_OPP_COOPERATE: { player: temptation, opponent: sucker },
+                BOTH_DEFECT: { player: punishment, opponent: punishment }
+            }
+        };
+    }
+
+    /**
+     * Start playground with custom parameters from sandbox
+     */
+    playWithCustomParams() {
+        this.customParams = this.getCustomParamsFromSandbox();
+        this.startPlayground(true); // Keep custom params
     }
 
     /**
@@ -614,8 +505,19 @@ class GameController {
 
         let generation = 0;
         const interval = setInterval(() => {
-            sandboxPopulation.evolve();
+            // Log generation header
+            this.logSandboxGeneration(generation + 1);
+
+            // Evolve with logging enabled
+            const matchLog = sandboxPopulation.evolve(true);
             generation++;
+
+            // Log matches from this generation
+            if (matchLog && matchLog.length > 0) {
+                matchLog.forEach(match => {
+                    this.logSandboxMatch(match.agentA, match.agentB, match.scoreA, match.scoreB);
+                });
+            }
 
             // Update live stats
             document.getElementById('sandbox-generation').textContent = generation;
@@ -734,6 +636,90 @@ class GameController {
         document.getElementById('sandbox-status').textContent = 'Ready';
 
         this.initializeSandboxChart();
+
+        // Clear log
+        const sandboxLog = document.getElementById('sandbox-log');
+        if (sandboxLog) {
+            sandboxLog.innerHTML = '';
+        }
+    }
+
+    /**
+     * Toggle sandbox log visibility
+     */
+    toggleSandboxLog() {
+        const container = document.getElementById('sandbox-log-container');
+        const button = document.getElementById('toggle-sandbox-log-btn');
+
+        if (container.classList.contains('hidden')) {
+            container.classList.remove('hidden');
+            button.textContent = '📊 Hide Match Log';
+        } else {
+            container.classList.add('hidden');
+            button.textContent = '📊 Show Match Log';
+        }
+    }
+
+    /**
+     * Log a generation header in sandbox
+     */
+    logSandboxGeneration(generation) {
+        const logDiv = document.getElementById('sandbox-log');
+        if (!logDiv) return;
+
+        const entry = document.createElement('div');
+        entry.className = 'sandbox-log-entry generation-header';
+        entry.textContent = `━━━ Generation ${generation} ━━━`;
+
+        logDiv.appendChild(entry);
+
+        // Auto-scroll to bottom
+        logDiv.scrollTop = logDiv.scrollHeight;
+
+        // Keep only last 200 entries to avoid memory issues
+        while (logDiv.children.length > 200) {
+            logDiv.removeChild(logDiv.firstChild);
+        }
+    }
+
+    /**
+     * Log a match result in sandbox
+     */
+    logSandboxMatch(agentA, agentB, scoreA, scoreB) {
+        const logDiv = document.getElementById('sandbox-log');
+        if (!logDiv) return;
+
+        const infoA = STRATEGY_INFO[agentA];
+        const infoB = STRATEGY_INFO[agentB];
+
+        const entry = document.createElement('div');
+        entry.className = 'sandbox-log-entry match-result';
+
+        let scoreClassA = 'score';
+        let scoreClassB = 'score';
+
+        if (scoreA > scoreB) {
+            scoreClassA += ' winner';
+            scoreClassB += ' loser';
+        } else if (scoreB > scoreA) {
+            scoreClassA += ' loser';
+            scoreClassB += ' winner';
+        } else {
+            scoreClassA += ' tie';
+            scoreClassB += ' tie';
+        }
+
+        entry.innerHTML = `
+            <div class="agent-name">${infoA.emoji} ${infoA.name}</div>
+            <div class="vs">vs</div>
+            <div class="agent-name">${infoB.emoji} ${infoB.name}</div>
+            <div class="${scoreClassA}">${scoreA} - ${scoreB}</div>
+        `;
+
+        logDiv.appendChild(entry);
+
+        // Auto-scroll to bottom
+        logDiv.scrollTop = logDiv.scrollHeight;
     }
 }
 
