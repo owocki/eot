@@ -82,6 +82,58 @@ h3 {
     color: #e74c3c;
 }
 
+/* Landing Page Options */
+.landing-options {
+    margin-top: 40px;
+}
+
+.landing-options h3 {
+    text-align: center;
+    color: #667eea;
+    margin-bottom: 30px;
+    font-size: 1.8em;
+}
+
+.option-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 25px;
+    margin-top: 30px;
+}
+
+.option-card {
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    padding: 30px 20px;
+    border-radius: 15px;
+    text-align: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border: 2px solid transparent;
+}
+
+.option-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+    border-color: #667eea;
+}
+
+.option-emoji {
+    font-size: 3em;
+    margin-bottom: 15px;
+}
+
+.option-card h4 {
+    color: #333;
+    margin-bottom: 10px;
+    font-size: 1.4em;
+}
+
+.option-card p {
+    color: #666;
+    margin-bottom: 20px;
+    font-size: 0.95em;
+    min-height: 40px;
+}
+
 /* Payoff Matrix */
 .payoff-matrix {
     margin: 30px 0;

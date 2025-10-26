@@ -299,6 +299,14 @@ class GameController {
     }
 
     /**
+     * Start evolution from menu
+     */
+    startEvolutionFromMenu() {
+        this.showSection('evolution');
+        this.resetEvolution();
+    }
+
+    /**
      * Start evolution simulation
      */
     startEvolution() {
