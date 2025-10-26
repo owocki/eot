@@ -1,3 +1,5 @@
+Demo: https://eot.owocki.com/
+
 # Evolution of Trust - Interactive Game
 
 An interactive remake/remix of Nicky Case's "Evolution of Trust" game, exploring how cooperation and trust emerge through repeated social dilemmas using game theory.

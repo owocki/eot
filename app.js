@@ -83,7 +83,7 @@ class GameController {
         const strategy = this.strategiesToTest[this.currentStrategyIndex];
         this.opponentAgent = new Agent(strategy);
         this.playerAgent = new Agent('player');
-        this.currentGame = new Game(this.playerAgent, this.opponentAgent, 10);
+        this.currentGame = new Game(this.playerAgent, this.opponentAgent, 7);
 
         this.updatePlaygroundUI();
         this.enableActionButtons();
@@ -103,7 +103,7 @@ class GameController {
 
         // Reset round counter
         document.getElementById('current-round').textContent = '1';
-        document.getElementById('total-rounds').textContent = '10';
+        document.getElementById('total-rounds').textContent = '7';
 
         // Clear history
         document.getElementById('history-display').innerHTML = '';
@@ -177,7 +177,7 @@ class GameController {
             } else {
                 this.enableActionButtons();
             }
-        }, 1500);
+        }, 100);
     }
 
     /**
@@ -305,7 +305,7 @@ class GameController {
         if (!this.population) {
             this.population = new Population({
                 populationSize: 100,
-                roundsPerMatch: 10,
+                roundsPerMatch: 7,
                 mutationRate: 0.05,
                 noiseRate: 0.02
             });
@@ -344,7 +344,7 @@ class GameController {
         this.pauseEvolution();
         this.population = new Population({
             populationSize: 100,
-            roundsPerMatch: 10,
+            roundsPerMatch: 7,
             mutationRate: 0.05,
             noiseRate: 0.02
         });
@@ -503,12 +503,12 @@ class GameController {
     resetSandbox() {
         document.getElementById('sandbox-results').innerHTML = '';
         document.getElementById('sandbox-population').value = 100;
-        document.getElementById('sandbox-rounds').value = 10;
+        document.getElementById('sandbox-rounds').value = 7;
         document.getElementById('sandbox-mutation').value = 5;
         document.getElementById('sandbox-noise').value = 2;
 
         document.getElementById('sandbox-pop-value').textContent = 100;
-        document.getElementById('sandbox-rounds-value').textContent = 10;
+        document.getElementById('sandbox-rounds-value').textContent = 7;
         document.getElementById('sandbox-mutation-value').textContent = 5;
         document.getElementById('sandbox-noise-value').textContent = 2;
     }
