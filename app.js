@@ -19,7 +19,77 @@ class GameController {
         this.matchResults = []; // Store results from each match
 
         this.initializeUI();
+        this.initializeRouting();
+    }
+
+    /**
+     * Initialize client-side routing
+     */
+    initializeRouting() {
+        // Handle hash changes
+        window.addEventListener('hashchange', () => {
+            this.handleRoute(window.location.hash);
+        });
+
+        // Handle initial route and params on load
         this.loadParamsFromURL();
+
+        // If no params were loaded, handle the initial hash
+        const params = new URLSearchParams(window.location.search);
+        if (params.toString() === '' || params.get('results') !== 'true') {
+            this.handleRoute(window.location.hash);
+        }
+    }
+
+    /**
+     * Navigate to a route
+     */
+    navigateTo(route, params = null) {
+        let url = `#${route}`;
+
+        // Add query parameters if provided
+        if (params) {
+            const searchParams = new URLSearchParams(params);
+            url = `#${route}?${searchParams.toString()}`;
+        }
+
+        // Update hash (which triggers hashchange event)
+        window.location.hash = url.substring(1); // Remove # for assignment
+    }
+
+    /**
+     * Handle route changes
+     */
+    handleRoute(hash) {
+        // Remove # and get route
+        const hashWithoutSymbol = hash.replace(/^#/, '');
+        const route = hashWithoutSymbol.split('?')[0] || '';
+
+        switch (route) {
+            case '':
+            case 'home':
+                this.showSection('tutorial');
+                break;
+            case 'play':
+                // Don't auto-navigate if we're already in playground
+                if (this.currentSection !== 'playground') {
+                    this.startPlayground(true);
+                }
+                break;
+            case 'sandbox':
+                // Don't auto-navigate if we're already in sandbox
+                if (this.currentSection !== 'sandbox') {
+                    this.startSandbox(true);
+                }
+                break;
+            case 'complete':
+                // Route handled by completion flow
+                break;
+            default:
+                // Unknown route, redirect to home
+                this.navigateTo('');
+                break;
+        }
     }
 
     /**
@@ -94,7 +164,7 @@ class GameController {
     /**
      * Switch between game sections
      */
-    showSection(sectionId) {
+    showSection(sectionId, updateRoute = true) {
         document.querySelectorAll('.game-section').forEach(section => {
             section.classList.remove('active');
         });
@@ -103,6 +173,23 @@ class GameController {
             section.classList.add('active');
         }
         this.currentSection = sectionId;
+
+        // Update URL route with hash
+        if (updateRoute) {
+            const routeMap = {
+                'tutorial': '',
+                'playground': 'play',
+                'sandbox': 'sandbox',
+                'evolution': 'play'
+            };
+            const route = routeMap[sectionId] || '';
+
+            // Only update if different from current hash
+            const currentHash = window.location.hash.replace(/^#/, '').split('?')[0];
+            if (currentHash !== route) {
+                window.location.hash = route;
+            }
+        }
 
         // Scroll to top of page
         window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -115,11 +202,8 @@ class GameController {
         // Reset custom params
         this.customParams = null;
 
-        // Clear URL parameters
-        window.history.pushState({}, '', window.location.pathname);
-
-        // Go to tutorial section
-        this.showSection('tutorial');
+        // Navigate to home route
+        this.navigateTo('');
     }
 
     /**
@@ -133,6 +217,12 @@ class GameController {
         if (!keepCustomParams) {
             this.customParams = null;
         }
+
+        // Update route if not already set
+        if (!window.location.hash.includes('play')) {
+            window.location.hash = 'play';
+        }
+
         this.loadNextStrategy();
     }
 
@@ -447,7 +537,10 @@ class GameController {
             }
         });
 
-        // Create scoreboard HTML
+        // Save results to URL for sharing
+        this.saveResultsToURL();
+
+        // Create scoreboard HTML with beautiful table
         let scoreboardHTML = `
             <div class="final-scoreboard">
                 <h2>🎮 Game Complete!</h2>
@@ -467,34 +560,61 @@ class GameController {
                 </div>
 
                 <h3>Match Results</h3>
-                <div class="scoreboard-matches">
+                <div class="results-table-container">
+                    <table class="results-table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Opponent</th>
+                                <th>Your Score</th>
+                                <th>Their Score</th>
+                                <th>Result</th>
+                            </tr>
+                        </thead>
+                        <tbody>
         `;
 
-        // Add individual match results
-        this.matchResults.forEach(result => {
+        // Add individual match results as table rows
+        this.matchResults.forEach((result, index) => {
             const info = STRATEGY_INFO[result.strategy];
             const outcome = result.playerScore > result.opponentScore ? 'win' :
                            result.playerScore < result.opponentScore ? 'loss' : 'tie';
             const outcomeText = outcome === 'win' ? '✓ Win' :
                                outcome === 'loss' ? '✗ Loss' : '− Tie';
+            const outcomeClass = outcome === 'win' ? 'outcome-win' :
+                                outcome === 'loss' ? 'outcome-loss' : 'outcome-tie';
 
             scoreboardHTML += `
-                <div class="match-row ${outcome}">
-                    <div class="match-opponent">
+                <tr class="result-row ${outcome}">
+                    <td class="match-number">${index + 1}</td>
+                    <td class="opponent-cell">
                         <span class="opponent-emoji">${info.emoji}</span>
                         <span class="opponent-name">${info.name}</span>
-                    </div>
-                    <div class="match-score">${result.playerScore} - ${result.opponentScore}</div>
-                    <div class="match-outcome">${outcomeText}</div>
-                </div>
+                    </td>
+                    <td class="score-cell player-score">${result.playerScore}</td>
+                    <td class="score-cell opponent-score">${result.opponentScore}</td>
+                    <td class="outcome-cell ${outcomeClass}">${outcomeText}</td>
+                </tr>
             `;
         });
 
         scoreboardHTML += `
+                        </tbody>
+                        <tfoot>
+                            <tr class="totals-row">
+                                <td colspan="2"><strong>Total</strong></td>
+                                <td class="score-cell total-player"><strong>${totalPlayerScore}</strong></td>
+                                <td class="score-cell total-opponent"><strong>${totalOpponentScore}</strong></td>
+                                <td class="outcome-cell">${totalPlayerScore > totalOpponentScore ? '✓ You Won!' : totalPlayerScore < totalOpponentScore ? '✗ You Lost' : '− Tied'}</td>
+                            </tr>
+                        </tfoot>
+                    </table>
                 </div>
+
                 <div class="scoreboard-actions">
+                    <button class="btn-primary" onclick="gameController.shareResults()">📤 Share Results</button>
                     <button class="btn-primary" onclick="gameController.startPlayground()">Play Again</button>
-                    <button class="btn-primary" onclick="gameController.startSandbox()">Try Sandbox Mode</button>
+                    <button class="btn-secondary" onclick="gameController.startSandbox()">Try Sandbox Mode</button>
                     <button class="btn-secondary" onclick="gameController.showSection('tutorial')">Back to Menu</button>
                 </div>
             </div>
@@ -514,6 +634,76 @@ class GameController {
         document.getElementById('next-strategy-btn').style.display = 'none';
 
         playgroundSection.appendChild(tempDiv.firstElementChild);
+    }
+
+    /**
+     * Save results to URL for sharing
+     */
+    saveResultsToURL() {
+        const params = {
+            results: 'true',
+            matches: this.matchResults.map(r =>
+                `${r.strategy}:${r.playerScore}:${r.opponentScore}`
+            ).join(',')
+        };
+
+        // Add custom params if they were used
+        if (this.customParams) {
+            params.custom = 'true';
+        }
+
+        // Navigate to complete route with results
+        this.navigateTo('complete', params);
+    }
+
+    /**
+     * Share results - copy URL to clipboard
+     */
+    async shareResults() {
+        const fullURL = window.location.href;
+
+        try {
+            await navigator.clipboard.writeText(fullURL);
+
+            // Show feedback
+            const buttons = document.querySelectorAll('.scoreboard-actions button');
+            const shareButton = buttons[0];
+            const originalText = shareButton.textContent;
+            shareButton.textContent = '✓ Link Copied!';
+            shareButton.style.background = '#27ae60';
+
+            setTimeout(() => {
+                shareButton.textContent = originalText;
+                shareButton.style.background = '';
+            }, 2000);
+        } catch (err) {
+            // Fallback for browsers that don't support clipboard API
+            alert('Copy this link to share your results:\n\n' + fullURL);
+        }
+    }
+
+    /**
+     * Load and display results from URL
+     */
+    loadResultsFromURL(params) {
+        const matchesStr = params.get('matches');
+        if (!matchesStr) return;
+
+        // Parse match results from URL
+        this.matchResults = matchesStr.split(',').map(match => {
+            const [strategy, playerScore, opponentScore] = match.split(':');
+            return {
+                strategy: strategy,
+                playerScore: parseInt(playerScore),
+                opponentScore: parseInt(opponentScore)
+            };
+        });
+
+        // Show playground section and display scoreboard
+        this.showSection('playground');
+        setTimeout(() => {
+            this.showFinalScoreboard();
+        }, 100);
     }
 
     /**
@@ -541,6 +731,12 @@ class GameController {
         if (!skipReset) {
             this.resetSandbox();
         }
+
+        // Update route if not already set
+        if (!window.location.hash.includes('sandbox')) {
+            window.location.hash = 'sandbox';
+        }
+
         this.initializeSandboxChart();
     }
 
@@ -583,58 +779,64 @@ class GameController {
     saveParamsToURL() {
         if (!this.customParams) return;
 
-        const params = new URLSearchParams();
+        const paramsObj = {};
 
         // Add game parameters
-        params.set('rounds', this.customParams.rounds);
-        params.set('noise', Math.round(this.customParams.noiseRate * 100));
+        paramsObj.rounds = this.customParams.rounds;
+        paramsObj.noise = Math.round(this.customParams.noiseRate * 100);
 
         // Add payoff matrix values
         const p = this.customParams.payoffs;
-        params.set('reward', p.BOTH_COOPERATE.player);
-        params.set('sucker', p.PLAYER_COOPERATE_OPP_DEFECT.player);
-        params.set('temptation', p.PLAYER_DEFECT_OPP_COOPERATE.player);
-        params.set('punishment', p.BOTH_DEFECT.player);
+        paramsObj.reward = p.BOTH_COOPERATE.player;
+        paramsObj.sucker = p.PLAYER_COOPERATE_OPP_DEFECT.player;
+        paramsObj.temptation = p.PLAYER_DEFECT_OPP_COOPERATE.player;
+        paramsObj.punishment = p.BOTH_DEFECT.player;
 
-        // Update URL without reloading
-        const newURL = `${window.location.pathname}?${params.toString()}`;
-        window.history.pushState({}, '', newURL);
+        // Navigate to play route with params
+        this.navigateTo('play', paramsObj);
     }
 
     /**
      * Save sandbox simulation parameters to URL
      */
     saveSandboxParamsToURL() {
-        const params = new URLSearchParams();
+        const paramsObj = {
+            mode: 'sandbox',
+            pop: document.getElementById('sandbox-population').value,
+            rounds: document.getElementById('sandbox-rounds').value,
+            mutation: document.getElementById('sandbox-mutation').value,
+            noise: document.getElementById('sandbox-noise').value,
+            reward: document.getElementById('payoff-reward').value,
+            sucker: document.getElementById('payoff-sucker').value,
+            temptation: document.getElementById('payoff-temptation').value,
+            punishment: document.getElementById('payoff-punishment').value
+        };
 
-        // Add simulation parameters
-        params.set('mode', 'sandbox');
-        params.set('pop', document.getElementById('sandbox-population').value);
-        params.set('rounds', document.getElementById('sandbox-rounds').value);
-        params.set('mutation', document.getElementById('sandbox-mutation').value);
-        params.set('noise', document.getElementById('sandbox-noise').value);
-
-        // Add payoff matrix values
-        params.set('reward', document.getElementById('payoff-reward').value);
-        params.set('sucker', document.getElementById('payoff-sucker').value);
-        params.set('temptation', document.getElementById('payoff-temptation').value);
-        params.set('punishment', document.getElementById('payoff-punishment').value);
-
-        // Update URL without reloading
-        const newURL = `${window.location.pathname}?${params.toString()}`;
-        window.history.pushState({}, '', newURL);
+        // Navigate to sandbox route with params
+        this.navigateTo('sandbox', paramsObj);
     }
 
     /**
      * Load parameters from URL on page load
      */
     loadParamsFromURL() {
-        const params = new URLSearchParams(window.location.search);
+        // Get hash and parse params from it
+        const hash = window.location.hash.replace(/^#/, '');
+        const hashParts = hash.split('?');
+        const route = hashParts[0];
+        const queryString = hashParts[1] || '';
+        const params = new URLSearchParams(queryString);
 
         // Check if we have any params in URL
         if (params.toString() === '') return;
 
-        const mode = params.get('mode');
+        // Check if this is a results share link
+        if (params.get('results') === 'true') {
+            this.loadResultsFromURL(params);
+            return;
+        }
+
+        const mode = params.get('mode') || route;
 
         // Get values from URL or use defaults
         const rounds = parseInt(params.get('rounds')) || 7;
@@ -896,8 +1098,8 @@ class GameController {
         params.set('temptation', document.getElementById('payoff-temptation').value);
         params.set('punishment', document.getElementById('payoff-punishment').value);
 
-        // Generate full URL
-        const fullURL = `${window.location.origin}${window.location.pathname}?${params.toString()}`;
+        // Generate full URL with hash routing
+        const fullURL = `${window.location.origin}${window.location.pathname}#sandbox?${params.toString()}`;
 
         // Copy to clipboard
         try {
@@ -961,8 +1163,8 @@ class GameController {
             sandboxLog.innerHTML = '';
         }
 
-        // Clear URL parameters
-        window.history.pushState({}, '', window.location.pathname);
+        // Clear URL parameters but keep sandbox route
+        window.location.hash = 'sandbox';
     }
 
     /**

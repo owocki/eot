@@ -6,6 +6,10 @@
     <title>Trust Simulator - Interactive Game Theory</title>
     <link rel="icon" href="favicon.svg" type="image/svg+xml">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🤝</text></svg>">
+    <!-- Brand Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.7.0/p5.min.js"></script>
 </head>
@@ -19,12 +23,13 @@
         <main id="game-container">
             <!-- Tutorial Section -->
             <section id="tutorial" class="game-section active">
-                <h2>Understanding the Game</h2>
+                <h2>Why?</h2>
 
                 <p class="concept-intro">
                     Explore one of the most fascinating puzzles in game theory: <strong>when should you trust, and when should you betray?</strong>
                 </p>
 
+                <h2>What?</h2>
                 <div class="concept-grid">
                     <div class="concept-card">
                         <span class="concept-card-icon">⚖️</span>
@@ -69,19 +74,20 @@
                 </div>
 
                 <div class="landing-options">
-                    <h3>Choose Your Experience</h3>
+                    <h3>How?</h3>
+                    <h4>Choose Your Experience</h4>
                     <div class="option-cards">
                         <div class="option-card">
                             <div class="option-emoji">🎮</div>
                             <h4>Play the Game</h4>
                             <p>Face different AI strategies and learn their patterns</p>
-                            <button class="btn-primary" onclick="gameController.startPlayground()">Start Playing</button>
+                            <button class="btn-primary" onclick="gameController.navigateTo('play')">Start Playing</button>
                         </div>
                         <div class="option-card">
                             <div class="option-emoji">🔬</div>
                             <h4>Sandbox Mode</h4>
                             <p>Experiment with custom parameters and conditions</p>
-                            <button class="btn-primary" onclick="gameController.startSandbox()">Open Sandbox</button>
+                            <button class="btn-primary" onclick="gameController.navigateTo('sandbox')">Open Sandbox</button>
                         </div>
                     </div>
                 </div>
@@ -272,7 +278,7 @@
         </main>
 
         <footer>
-            <p>Inspired by Nicky Case's "Evolution of Trust" | Built with game theory and love by ya boiiii <a style="color:white" href="https://x.com/owocoki">@owocki</a></p>
+            <p>Inspired by Nicky Case's "<a style="color:white;" href="https://ncase.me/trust/">Evolution of Trust</a>" | Built with game theory and love by ya boiiii <a style="color:white" href="https://x.com/owocoki">@owocki</a></p>
         </footer>
     </div>
 
