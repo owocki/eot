@@ -1,0 +1,13 @@
+{
+  "network": "Base Sepolia",
+  "chainId": 84532,
+  "contractAddress": "0xa2eE3C8bc9511De79b3CA5868A42526a271Ccb35",
+  "deployer": "0xe73417AcE35B4B62f0Cf9d0078b56569b079309E",
+  "treasuryAddress": "0xe73417AcE35B4B62f0Cf9d0078b56569b079309E",
+  "bondAmount": "0.001 ETH",
+  "maxRounds": 10,
+  "treasuryFee": "0.5%",
+  "deployedAt": "2025-10-26",
+  "blockExplorer": "https://sepolia.basescan.org/address/0xa2eE3C8bc9511De79b3CA5868A42526a271Ccb35",
+  "status": "LIVE ON TESTNET"
+}

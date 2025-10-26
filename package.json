@@ -1,0 +1,21 @@
+{
+  "name": "evolution-of-trust",
+  "version": "1.0.0",
+  "description": "Web3 multiplayer prisoner's dilemma game",
+  "scripts": {
+    "deploy:local": "hardhat run scripts/deploy.js --network localhost",
+    "deploy:sepolia": "hardhat run scripts/deploy.js --network sepolia",
+    "deploy:base": "hardhat run scripts/deploy.js --network base",
+    "deploy:baseSepolia": "hardhat run scripts/deploy.js --network baseSepolia",
+    "test": "hardhat test",
+    "node": "hardhat node"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^4.0.0",
+    "@openzeppelin/contracts": "^5.0.1",
+    "hardhat": "^2.19.4"
+  },
+  "dependencies": {
+    "dotenv": "^17.2.3"
+  }
+}

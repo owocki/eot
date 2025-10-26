@@ -1,0 +1,38 @@
+# Environment variables (NEVER COMMIT THESE!)
+.env
+
+# Hardhat files
+cache
+artifacts
+node_modules
+
+# TypeChain files
+typechain
+typechain-types
+
+# Deployment data (may contain sensitive info)
+deployments
+deployment.json
+
+# Coverage reports
+coverage
+coverage.json
+
+# Hardhat Ignition default folder for deployments against a local node
+ignition/deployments/chain-31337
+
+# Editor directories
+.vscode
+.idea
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+
+# Lock files (choose one)
+# package-lock.json
+# yarn.lock
