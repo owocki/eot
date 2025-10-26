@@ -307,6 +307,49 @@ class GameController {
     }
 
     /**
+     * Toggle evolution details panel
+     */
+    toggleEvolutionDetails() {
+        const container = document.getElementById('evolution-canvas-container');
+        const button = document.getElementById('toggle-details-btn');
+
+        if (container.classList.contains('hidden')) {
+            container.classList.remove('hidden');
+            button.textContent = '📊 Hide Details';
+        } else {
+            container.classList.add('hidden');
+            button.textContent = '📊 Show Details';
+        }
+    }
+
+    /**
+     * Log evolution event
+     */
+    logEvolutionEvent(message, isMilestone = false) {
+        const detailsDiv = document.getElementById('evolution-details');
+        if (!detailsDiv) return;
+
+        const entry = document.createElement('div');
+        entry.className = isMilestone ? 'log-entry milestone' : 'log-entry';
+
+        const generation = this.population ? this.population.generation : 0;
+        entry.innerHTML = `
+            <span class="timestamp">Gen ${generation}:</span>
+            <span class="event">${message}</span>
+        `;
+
+        detailsDiv.appendChild(entry);
+
+        // Auto-scroll to bottom
+        detailsDiv.scrollTop = detailsDiv.scrollHeight;
+
+        // Keep only last 50 entries to avoid memory issues
+        while (detailsDiv.children.length > 50) {
+            detailsDiv.removeChild(detailsDiv.firstChild);
+        }
+    }
+
+    /**
      * Start evolution simulation
      */
     startEvolution() {
@@ -318,19 +361,59 @@ class GameController {
                 noiseRate: 0.02
             });
             this.updatePopulationChart();
+            this.logEvolutionEvent('🚀 Simulation started with 100 agents across 6 strategies', true);
+        } else {
+            this.logEvolutionEvent('▶️ Simulation resumed', true);
         }
 
         document.getElementById('start-evolution-btn').style.display = 'none';
         document.getElementById('pause-evolution-btn').style.display = 'inline-block';
 
         this.evolutionInterval = setInterval(() => {
+            const prevDistribution = this.population.getDistribution();
             this.population.evolve();
             this.updateEvolutionDisplay();
 
+            // Log significant events
+            const newDistribution = this.population.getDistribution();
+            this.logEvolutionChanges(prevDistribution, newDistribution);
+
             if (this.population.generation >= 50) {
                 this.pauseEvolution();
+                this.logEvolutionEvent('🏁 Simulation completed after 50 generations', true);
             }
         }, 500);
+    }
+
+    /**
+     * Log changes between generations
+     */
+    logEvolutionChanges(prevDist, newDist) {
+        const gen = this.population.generation;
+
+        // Check for extinctions
+        Object.keys(prevDist).forEach(strategy => {
+            if (prevDist[strategy] > 0 && newDist[strategy] === 0) {
+                const info = STRATEGY_INFO[strategy];
+                this.logEvolutionEvent(`💀 ${info.emoji} ${info.name} went extinct`);
+            }
+        });
+
+        // Check for dominance (>70%)
+        Object.entries(newDist).forEach(([strategy, count]) => {
+            const percentage = (count / this.population.populationSize) * 100;
+            if (percentage > 70 && prevDist[strategy] / this.population.populationSize * 100 <= 70) {
+                const info = STRATEGY_INFO[strategy];
+                this.logEvolutionEvent(`👑 ${info.emoji} ${info.name} is now dominant (${percentage.toFixed(0)}%)`, true);
+            }
+        });
+
+        // Milestone generations
+        if (gen % 10 === 0 && gen > 0) {
+            const dominant = Object.entries(newDist).reduce((a, b) => a[1] > b[1] ? a : b);
+            const info = STRATEGY_INFO[dominant[0]];
+            this.logEvolutionEvent(`📊 Checkpoint: ${info.emoji} ${info.name} leads with ${dominant[1]} agents`, true);
+        }
     }
 
     /**
@@ -340,6 +423,7 @@ class GameController {
         if (this.evolutionInterval) {
             clearInterval(this.evolutionInterval);
             this.evolutionInterval = null;
+            this.logEvolutionEvent('⏸️ Simulation paused');
         }
         document.getElementById('start-evolution-btn').style.display = 'inline-block';
         document.getElementById('pause-evolution-btn').style.display = 'none';
@@ -357,6 +441,13 @@ class GameController {
             noiseRate: 0.02
         });
         this.updateEvolutionDisplay();
+
+        // Clear the log
+        const detailsDiv = document.getElementById('evolution-details');
+        if (detailsDiv) {
+            detailsDiv.innerHTML = '';
+        }
+        this.logEvolutionEvent('🔄 Simulation reset to initial state', true);
     }
 
     /**
@@ -408,6 +499,47 @@ class GameController {
     startSandbox() {
         this.showSection('sandbox');
         this.resetSandbox();
+        this.initializeSandboxChart();
+    }
+
+    /**
+     * Initialize sandbox population chart
+     */
+    initializeSandboxChart() {
+        const chartDiv = document.getElementById('sandbox-population-chart');
+        chartDiv.innerHTML = '';
+
+        // Create chart bars
+        Object.values(STRATEGIES).forEach(strategy => {
+            const info = STRATEGY_INFO[strategy];
+            const barDiv = document.createElement('div');
+            barDiv.className = 'strategy-bar';
+            barDiv.innerHTML = `
+                <div class="label">${info.emoji} ${info.name}</div>
+                <div class="bar-container">
+                    <div class="bar-fill strategy-${strategy}" data-strategy="${strategy}"></div>
+                </div>
+            `;
+            chartDiv.appendChild(barDiv);
+        });
+    }
+
+    /**
+     * Update sandbox population chart
+     */
+    updateSandboxChart(population) {
+        const distribution = population.getDistribution();
+        const chartDiv = document.getElementById('sandbox-population-chart');
+        const total = population.populationSize;
+
+        Object.entries(distribution).forEach(([strategy, count]) => {
+            const percentage = (count / total) * 100;
+            const barFill = chartDiv.querySelector(`[data-strategy="${strategy}"]`);
+            if (barFill) {
+                barFill.style.width = percentage + '%';
+                barFill.textContent = count > 0 ? count : '';
+            }
+        });
     }
 
     /**
@@ -426,17 +558,29 @@ class GameController {
             noiseRate
         });
 
-        // Run 50 generations
+        // Initialize chart with starting population
+        this.updateSandboxChart(sandboxPopulation);
+
+        // Update stats
+        document.getElementById('sandbox-population-size').textContent = populationSize;
+        document.getElementById('sandbox-status').textContent = 'Running...';
+
+        // Clear previous results
         const resultsDiv = document.getElementById('sandbox-results');
-        resultsDiv.innerHTML = '<h3>Running simulation...</h3>';
+        resultsDiv.innerHTML = '';
 
         let generation = 0;
         const interval = setInterval(() => {
             sandboxPopulation.evolve();
             generation++;
 
+            // Update live stats
+            document.getElementById('sandbox-generation').textContent = generation;
+            this.updateSandboxChart(sandboxPopulation);
+
             if (generation >= 50) {
                 clearInterval(interval);
+                document.getElementById('sandbox-status').textContent = 'Complete';
                 this.displaySandboxResults(sandboxPopulation);
             }
         }, 100);
@@ -450,39 +594,61 @@ class GameController {
         const distribution = population.getDistribution();
         const total = population.populationSize;
 
-        let html = '<h3>Final Results (Generation 50)</h3>';
-        html += '<div style="margin-top: 20px;">';
-
-        Object.entries(distribution).forEach(([strategy, count]) => {
-            const info = STRATEGY_INFO[strategy];
-            const percentage = ((count / total) * 100).toFixed(1);
-            html += `
-                <div class="strategy-bar">
-                    <div class="label">${info.emoji} ${info.name}</div>
-                    <div class="bar-container">
-                        <div class="bar-fill strategy-${strategy}" style="width: ${percentage}%;">
-                            ${count > 0 ? count : ''}
-                        </div>
-                    </div>
-                </div>
-            `;
-        });
-
-        html += '</div>';
-
-        // Add insights
+        // Calculate statistics
         const dominant = Object.entries(distribution).reduce((a, b) => a[1] > b[1] ? a : b);
         const dominantInfo = STRATEGY_INFO[dominant[0]];
+        const extinct = Object.entries(distribution).filter(([_, count]) => count === 0).map(([strategy, _]) => STRATEGY_INFO[strategy].name);
+        const surviving = Object.entries(distribution).filter(([_, count]) => count > 0).length;
 
-        html += `
-            <div class="narrative-text" style="margin-top: 30px;">
-                <h4>Analysis</h4>
-                <p><strong>Dominant Strategy:</strong> ${dominantInfo.emoji} ${dominantInfo.name} (${dominant[1]} agents)</p>
-                <p>${this.getInsight(dominant[0], distribution)}</p>
+        let html = `
+            <div class="narrative-text">
+                <h3>Simulation Analysis</h3>
+                <div style="margin-top: 20px;">
+                    <p><strong>Dominant Strategy:</strong> ${dominantInfo.emoji} ${dominantInfo.name} (${dominant[1]} agents, ${((dominant[1]/total)*100).toFixed(1)}%)</p>
+                    <p><strong>Strategies Surviving:</strong> ${surviving} out of ${Object.keys(STRATEGIES).length}</p>
+                    ${extinct.length > 0 ? `<p><strong>Extinct Strategies:</strong> ${extinct.join(', ')}</p>` : '<p><strong>All strategies survived!</strong></p>'}
+                    <p style="margin-top: 15px;">${this.getInsight(dominant[0], distribution)}</p>
+                </div>
+
+                <div style="margin-top: 20px; padding-top: 20px; border-top: 2px solid #ddd;">
+                    <h4>What This Means</h4>
+                    <p>${this.getParameterInsight(population)}</p>
+                </div>
             </div>
         `;
 
         resultsDiv.innerHTML = html;
+    }
+
+    /**
+     * Get insight based on simulation parameters
+     */
+    getParameterInsight(population) {
+        const insights = [];
+
+        if (population.mutationRate > 0.1) {
+            insights.push('High mutation rate led to more diversity and unpredictability.');
+        } else if (population.mutationRate === 0) {
+            insights.push('With no mutations, strategies compete purely on merit.');
+        }
+
+        if (population.noiseRate > 0.05) {
+            insights.push('High noise made cooperation more difficult, as mistakes were common.');
+        } else if (population.noiseRate === 0) {
+            insights.push('Perfect information allowed strategies to execute flawlessly.');
+        }
+
+        if (population.roundsPerMatch < 5) {
+            insights.push('Short matches favored simple strategies.');
+        } else if (population.roundsPerMatch > 12) {
+            insights.push('Long matches allowed complex patterns to emerge.');
+        }
+
+        if (insights.length === 0) {
+            return 'Try adjusting the parameters to see how they affect which strategies thrive!';
+        }
+
+        return insights.join(' ');
     }
 
     /**
@@ -519,6 +685,12 @@ class GameController {
         document.getElementById('sandbox-rounds-value').textContent = 7;
         document.getElementById('sandbox-mutation-value').textContent = 5;
         document.getElementById('sandbox-noise-value').textContent = 2;
+
+        document.getElementById('sandbox-generation').textContent = 0;
+        document.getElementById('sandbox-population-size').textContent = 100;
+        document.getElementById('sandbox-status').textContent = 'Ready';
+
+        this.initializeSandboxChart();
     }
 }
 

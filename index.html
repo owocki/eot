@@ -20,9 +20,40 @@
             <!-- Tutorial Section -->
             <section id="tutorial" class="game-section active">
                 <h2>Understanding the Game</h2>
-                <div class="narrative-text">
-                    <p>In this game, you'll explore how trust emerges in repeated interactions.</p>
-                    <p>Each round, you and your opponent choose: <strong class="cooperate">Cooperate</strong> or <strong class="defect">Defect</strong>.</p>
+
+                <p class="concept-intro">
+                    Explore one of the most fascinating puzzles in game theory: <strong>when should you trust, and when should you betray?</strong>
+                </p>
+
+                <div class="concept-grid">
+                    <div class="concept-card">
+                        <span class="concept-card-icon">⚖️</span>
+                        <h3>The Dilemma</h3>
+                        <p>Two players independently choose: cooperate or defect. Cooperation benefits both, but defection offers a higher personal payoff—at your partner's expense. The catch? If both defect, both lose.</p>
+                    </div>
+
+                    <div class="concept-card">
+                        <span class="concept-card-icon">🌍</span>
+                        <h3>Why It Matters</h3>
+                        <p>This simple dynamic appears everywhere: climate agreements, business partnerships, international relations, and everyday social interactions. It's the fundamental tension between individual gain and collective good.</p>
+                    </div>
+
+                    <div class="concept-card">
+                        <span class="concept-card-icon">🔄</span>
+                        <h3>Repeated Interactions</h3>
+                        <p>When the game repeats, everything changes. Strategies emerge: some always cooperate, others always defect, some retaliate when betrayed, others forgive. Reputation matters. History matters.</p>
+                    </div>
+
+                    <div class="concept-card">
+                        <span class="concept-card-icon">🧬</span>
+                        <h3>Evolution in Action</h3>
+                        <p>Watch strategies compete in a living population. Successful strategies reproduce, unsuccessful ones die out. Discover which approaches thrive, which collapse, and why cooperation can emerge—or fail.</p>
+                    </div>
+                </div>
+
+                <div class="key-insight">
+                    <div class="key-insight-label">The Central Question</div>
+                    <div class="key-insight-text">When does cooperation emerge, and when does it collapse?</div>
                 </div>
 
                 <div class="payoff-matrix">
@@ -59,13 +90,13 @@
                             <div class="option-emoji">🧬</div>
                             <h4>Evolution Simulator</h4>
                             <p>Watch strategies compete and evolve over generations</p>
-                            <button class="btn-secondary" onclick="gameController.startEvolutionFromMenu()">Launch Simulator</button>
+                            <button class="btn-primary" onclick="gameController.startEvolutionFromMenu()">Launch Simulator</button>
                         </div>
                         <div class="option-card">
                             <div class="option-emoji">🔬</div>
                             <h4>Sandbox Mode</h4>
                             <p>Experiment with custom parameters and conditions</p>
-                            <button class="btn-secondary" onclick="gameController.startSandbox()">Open Sandbox</button>
+                            <button class="btn-primary" onclick="gameController.startSandbox()">Open Sandbox</button>
                         </div>
                     </div>
                 </div>
@@ -124,8 +155,6 @@
                     <p>Each generation, successful strategies reproduce and unsuccessful ones die out.</p>
                 </div>
 
-                <div id="evolution-canvas-container"></div>
-
                 <div class="evolution-controls">
                     <div class="evolution-stats">
                         <div>Generation: <span id="generation">0</span> / 50</div>
@@ -140,6 +169,13 @@
                     <button id="reset-evolution-btn" class="btn-secondary" onclick="gameController.resetEvolution()">
                         Reset
                     </button>
+                    <button id="toggle-details-btn" class="btn-secondary" onclick="gameController.toggleEvolutionDetails()">
+                        📊 Show Details
+                    </button>
+                </div>
+
+                <div id="evolution-canvas-container" class="hidden">
+                    <div id="evolution-details" class="evolution-log"></div>
                 </div>
 
                 <div id="population-chart"></div>
@@ -173,12 +209,18 @@
                     </div>
                 </div>
 
-                <div id="sandbox-canvas-container"></div>
-
                 <div class="sandbox-buttons">
                     <button class="btn-primary" onclick="gameController.runSandboxSimulation()">Run Simulation</button>
                     <button class="btn-secondary" onclick="gameController.resetSandbox()">Reset</button>
                 </div>
+
+                <div class="sandbox-stats">
+                    <div>Generation: <span id="sandbox-generation">0</span> / 50</div>
+                    <div>Population: <span id="sandbox-population-size">100</span></div>
+                    <div>Status: <span id="sandbox-status">Ready</span></div>
+                </div>
+
+                <div id="sandbox-population-chart"></div>
 
                 <div id="sandbox-results"></div>
             </section>
