@@ -68,27 +68,6 @@
                     <div class="key-insight-text">When does cooperation emerge, and when does it collapse?</div>
                 </div>
 
-                <div class="payoff-matrix">
-                    <h3>Payoff Matrix</h3>
-                    <table>
-                        <tr>
-                            <th></th>
-                            <th>Opponent Cooperates</th>
-                            <th>Opponent Defects</th>
-                        </tr>
-                        <tr>
-                            <th>You Cooperate</th>
-                            <td class="both-cooperate">+3 / +3</td>
-                            <td class="sucker">0 / +5</td>
-                        </tr>
-                        <tr>
-                            <th>You Defect</th>
-                            <td class="temptation">+5 / 0</td>
-                            <td class="both-defect">+1 / +1</td>
-                        </tr>
-                    </table>
-                </div>
-
                 <div class="landing-options">
                     <h3>Choose Your Experience</h3>
                     <div class="option-cards">
@@ -119,6 +98,27 @@
                 <h2>Meet the Strategies</h2>
                 <div class="narrative-text">
                     <p id="strategy-description">Let's play against different strategies...</p>
+                </div>
+
+                <div class="payoff-matrix">
+                    <h3>Payoff Matrix</h3>
+                    <table>
+                        <tr>
+                            <th></th>
+                            <th>Opponent Cooperates</th>
+                            <th>Opponent Defects</th>
+                        </tr>
+                        <tr>
+                            <th>You Cooperate</th>
+                            <td class="both-cooperate">+3 / +3</td>
+                            <td class="sucker">0 / +5</td>
+                        </tr>
+                        <tr>
+                            <th>You Defect</th>
+                            <td class="temptation">+5 / 0</td>
+                            <td class="both-defect">+1 / +1</td>
+                        </tr>
+                    </table>
                 </div>
 
                 <div class="game-board">
@@ -200,6 +200,57 @@
                 <h2>Sandbox Mode</h2>
                 <div class="narrative-text">
                     <p>Experiment with different parameters to see how they shape the evolution of cooperation. Each setting creates a different environment where strategies must adapt and compete.</p>
+                </div>
+
+                <div class="payoff-matrix-config">
+                    <h3>Configure Payoff Matrix</h3>
+                    <p class="param-description">Adjust the rewards for each outcome. The classic prisoner's dilemma requires: Temptation > Reward > Punishment > Sucker (T > R > P > S).</p>
+                    <div class="payoff-grid">
+                        <div class="payoff-input">
+                            <label>
+                                <span class="payoff-label">Both Cooperate (Reward)</span>
+                                <input type="number" id="payoff-reward" min="0" max="10" value="3" step="1">
+                            </label>
+                        </div>
+                        <div class="payoff-input">
+                            <label>
+                                <span class="payoff-label">Cooperate vs Defect (Sucker)</span>
+                                <input type="number" id="payoff-sucker" min="0" max="10" value="0" step="1">
+                            </label>
+                        </div>
+                        <div class="payoff-input">
+                            <label>
+                                <span class="payoff-label">Defect vs Cooperate (Temptation)</span>
+                                <input type="number" id="payoff-temptation" min="0" max="10" value="5" step="1">
+                            </label>
+                        </div>
+                        <div class="payoff-input">
+                            <label>
+                                <span class="payoff-label">Both Defect (Punishment)</span>
+                                <input type="number" id="payoff-punishment" min="0" max="10" value="1" step="1">
+                            </label>
+                        </div>
+                    </div>
+                    <div class="payoff-matrix">
+                        <h4>Current Matrix</h4>
+                        <table>
+                            <tr>
+                                <th></th>
+                                <th>Opponent Cooperates</th>
+                                <th>Opponent Defects</th>
+                            </tr>
+                            <tr>
+                                <th>You Cooperate</th>
+                                <td class="both-cooperate"><span id="display-reward">+3</span> / <span id="display-reward-2">+3</span></td>
+                                <td class="sucker"><span id="display-sucker">0</span> / <span id="display-temptation-2">+5</span></td>
+                            </tr>
+                            <tr>
+                                <th>You Defect</th>
+                                <td class="temptation"><span id="display-temptation">+5</span> / <span id="display-sucker-2">0</span></td>
+                                <td class="both-defect"><span id="display-punishment">+1</span> / <span id="display-punishment-2">+1</span></td>
+                            </tr>
+                        </table>
+                    </div>
                 </div>
 
                 <div class="sandbox-controls">

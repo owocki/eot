@@ -46,6 +46,49 @@ class GameController {
                 });
             }
         });
+
+        // Payoff matrix inputs
+        this.initializePayoffInputs();
+    }
+
+    /**
+     * Initialize payoff matrix input listeners
+     */
+    initializePayoffInputs() {
+        const updatePayoffDisplay = () => {
+            const reward = document.getElementById('payoff-reward')?.value || 3;
+            const sucker = document.getElementById('payoff-sucker')?.value || 0;
+            const temptation = document.getElementById('payoff-temptation')?.value || 5;
+            const punishment = document.getElementById('payoff-punishment')?.value || 1;
+
+            // Update all display spans
+            const updates = [
+                { id: 'display-reward', value: `+${reward}` },
+                { id: 'display-reward-2', value: `+${reward}` },
+                { id: 'display-sucker', value: sucker },
+                { id: 'display-sucker-2', value: sucker },
+                { id: 'display-temptation', value: `+${temptation}` },
+                { id: 'display-temptation-2', value: `+${temptation}` },
+                { id: 'display-punishment', value: `+${punishment}` },
+                { id: 'display-punishment-2', value: `+${punishment}` }
+            ];
+
+            updates.forEach(({ id, value }) => {
+                const element = document.getElementById(id);
+                if (element) {
+                    element.textContent = value;
+                }
+            });
+        };
+
+        // Add listeners to all payoff inputs
+        const payoffInputs = ['payoff-reward', 'payoff-sucker', 'payoff-temptation', 'payoff-punishment'];
+        payoffInputs.forEach(id => {
+            const input = document.getElementById(id);
+            if (input) {
+                input.addEventListener('input', updatePayoffDisplay);
+            }
+        });
     }
 
     /**

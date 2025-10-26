@@ -574,6 +574,74 @@ h3 {
 .strategy-random { background: #95a5a6; }
 .strategy-detective { background: #f39c12; }
 
+/* Payoff Matrix Configuration */
+.payoff-matrix-config {
+    margin: 30px 0;
+    padding: 25px;
+    background: #f7f9fc;
+    border-radius: 10px;
+    border-left: 4px solid #667eea;
+}
+
+.payoff-matrix-config h3 {
+    color: #667eea;
+    margin-bottom: 10px;
+}
+
+.payoff-matrix-config h4 {
+    color: #555;
+    margin-bottom: 10px;
+    margin-top: 20px;
+}
+
+.payoff-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin: 20px 0;
+}
+
+.payoff-input {
+    background: white;
+    padding: 15px;
+    border-radius: 8px;
+    border: 2px solid #e1e8ed;
+    transition: all 0.3s ease;
+}
+
+.payoff-input:hover {
+    border-color: #667eea;
+}
+
+.payoff-input label {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.payoff-label {
+    font-weight: bold;
+    color: #333;
+    font-size: 0.95em;
+}
+
+.payoff-input input[type="number"] {
+    padding: 10px;
+    font-size: 1.1em;
+    border: 2px solid #ddd;
+    border-radius: 6px;
+    text-align: center;
+    font-weight: bold;
+    color: #667eea;
+    transition: all 0.3s ease;
+}
+
+.payoff-input input[type="number"]:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
 /* Sandbox Section */
 .sandbox-controls {
     display: grid;
@@ -679,6 +747,14 @@ footer {
     }
 
     .sandbox-controls {
+        grid-template-columns: 1fr;
+    }
+
+    .payoff-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .concept-grid {
         grid-template-columns: 1fr;
     }
 
