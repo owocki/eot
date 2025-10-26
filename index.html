@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Evolution of Trust - Interactive Game</title>
+    <title>Trust Simulator - Interactive Game Theory</title>
     <link rel="icon" href="favicon.svg" type="image/svg+xml">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🤝</text></svg>">
     <link rel="stylesheet" href="styles.css">
@@ -12,8 +12,8 @@
 <body>
     <div id="app">
         <header>
-            <h1>Evolution of Trust</h1>
-            <p class="subtitle">An interactive guide to the game theory of cooperation</p>
+            <h1 class="site-title" onclick="gameController.goToHome()">Trust Simulator</h1>
+            <p class="subtitle">An interactive simulation of the game theory of cooperation</p>
         </header>
 
         <main id="game-container">
@@ -155,7 +155,13 @@
 
             <!-- Sandbox Section -->
             <section id="sandbox" class="game-section">
-                <h2>Sandbox Mode</h2>
+                <div class="sandbox-header">
+                    <h2>Sandbox Mode</h2>
+                    <div class="sandbox-header-actions">
+                        <button class="btn-primary" onclick="gameController.playWithCustomParams()">🎮 Play with These Settings</button>
+                        <button class="btn-secondary" id="copy-link-btn" onclick="gameController.copySettingsLink()">🔗 Copy Link</button>
+                    </div>
+                </div>
                 <div class="narrative-text">
                     <p>Experiment with different parameters to see how they shape the evolution of cooperation. Each setting creates a different environment where strategies must adapt and compete.</p>
                 </div>
@@ -244,7 +250,6 @@
 
                 <div class="sandbox-buttons">
                     <button class="btn-primary" onclick="gameController.runSandboxSimulation()">Run Simulation</button>
-                    <button class="btn-primary" onclick="gameController.playWithCustomParams()">🎮 Play with These Settings</button>
                     <button class="btn-secondary" onclick="gameController.resetSandbox()">Reset</button>
                     <button id="toggle-sandbox-log-btn" class="btn-secondary" onclick="gameController.toggleSandboxLog()">📊 Show Match Log</button>
                 </div>
@@ -267,7 +272,7 @@
         </main>
 
         <footer>
-            <p>Inspired by Nicky Case's "Evolution of Trust" | Built with game theory and love</p>
+            <p>Inspired by Nicky Case's "Evolution of Trust" | Built with game theory and love by ya boiiii <a style="color:white" href="https://x.com/owocoki">@owocki</a></p>
         </footer>
     </div>
 
