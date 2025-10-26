@@ -75,7 +75,6 @@
 
                 <div class="landing-options">
                     <h3>How?</h3>
-                    <h4>Choose Your Experience</h4>
                     <div class="option-cards">
                         <div class="option-card">
                             <div class="option-emoji">🎮</div>
@@ -95,13 +94,8 @@
 
             <!-- Playground Section -->
             <section id="playground" class="game-section">
-                <h2>Meet the Strategies</h2>
-                <div class="narrative-text">
-                    <p id="strategy-description">Let's play against different strategies...</p>
-                </div>
-
                 <div class="payoff-matrix">
-                    <h3>Payoff Matrix <span id="custom-params-indicator" style="display: none; color: #667eea; font-size: 0.8em;">(Custom Settings)</span></h3>
+                    <h3>Payoff Matrix <span id="custom-params-indicator" style="display: none; color: var(--iris); font-size: 0.8em;">(Custom Settings)</span></h3>
                     <table>
                         <tr>
                             <th></th>
@@ -121,6 +115,15 @@
                     </table>
                 </div>
 
+                <h2>You are playing against..</h2>
+
+                <div class="strategy-intro">
+                    <h3 id="opponent-name">Opponent</h3>
+                    <div class="narrative-text">
+                        <p id="strategy-description">Let's play against different strategies...</p>
+                    </div>
+                </div>
+
                 <div class="game-board">
                     <div class="player-area">
                         <h3>You</h3>
@@ -134,7 +137,7 @@
                     </div>
 
                     <div class="opponent-area">
-                        <h3 id="opponent-name">Opponent</h3>
+                        <h3>Opponent</h3>
                         <div id="opponent-visual" class="agent-visual"></div>
                         <div class="score">Score: <span id="opponent-score">0</span></div>
                     </div>

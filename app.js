@@ -244,6 +244,9 @@ class GameController {
         }
 
         // Show game UI elements
+        playgroundSection.querySelector('h2').style.display = 'block';
+        const strategyIntro = playgroundSection.querySelector('.strategy-intro');
+        if (strategyIntro) strategyIntro.style.display = 'block';
         playgroundSection.querySelector('.narrative-text').style.display = 'block';
         playgroundSection.querySelector('.payoff-matrix').style.display = 'block';
         playgroundSection.querySelector('.game-board').style.display = 'grid';
@@ -626,6 +629,9 @@ class GameController {
         tempDiv.innerHTML = scoreboardHTML;
 
         // Hide game UI and show scoreboard
+        playgroundSection.querySelector('h2').style.display = 'none';
+        const strategyIntro = playgroundSection.querySelector('.strategy-intro');
+        if (strategyIntro) strategyIntro.style.display = 'none';
         playgroundSection.querySelector('.narrative-text').style.display = 'none';
         playgroundSection.querySelector('.payoff-matrix').style.display = 'none';
         playgroundSection.querySelector('.game-board').style.display = 'none';
